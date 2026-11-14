@@ -35,10 +35,10 @@ const t=k=>copy[lang][k]||k;
 function render(){document.documentElement.lang=lang;document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));document.querySelectorAll("[data-t-html]").forEach(el=>el.innerHTML=t(el.dataset.tHtml));document.getElementById("language").textContent=lang==="ru"?"ҚАЗ":"РУС";document.getElementById("gradeGrid").innerHTML=[5,6,7,8,9,10,11].map(n=>'<button type="button" class="grade" data-grade="'+n+'"><span class="symbol">✧</span><strong>'+n+'</strong><small>'+t("grade")+' →</small></button>').join("");document.getElementById("featuresGrid").innerHTML=copy[lang].featureItems.map(f=>'<article class="feature"><span class="symbol">'+f[0]+'</span><h3>'+f[1]+'</h3><p>'+f[2]+'</p></article>').join("")}
 const modal=document.getElementById("modal");const toast=document.getElementById("toast");let toastTimer;
 function notify(message){toast.textContent=message;toast.classList.add("visible");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("visible"),4200)}
-function closeModal(){modal.classList.remove("open");document.getElementById("password").value="";document.getElementById("loginBtn").focus()}
+function closeModal(){modal.classList.remove("open");document.getElementById("password").value="";document.getElementById("language").focus()}
 document.getElementById("language").addEventListener("click",()=>{lang=lang==="ru"?"kk":"ru";try{localStorage.setItem("m-academy-lang",lang)}catch{}render()});
 document.getElementById("gradeGrid").addEventListener("click",e=>{const b=e.target.closest("[data-grade]");if(b)notify(b.dataset.grade+" "+t("grade")+": "+t("notReady"))});
-document.getElementById("loginBtn").addEventListener("click",()=>{modal.classList.add("open");document.getElementById("username").focus()});
+
 document.getElementById("closeModal").addEventListener("click",closeModal);modal.addEventListener("click",e=>{if(e.target===modal)closeModal()});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("open"))closeModal()});
 document.getElementById("loginForm").addEventListener("submit",e=>{e.preventDefault();notify(t("loginPending"));document.getElementById("password").value=""});
 render();
