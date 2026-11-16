@@ -51,7 +51,7 @@ function headerChanged(){const table=sheets[selectedSheet]?.data||[];const idx=N
 function normalizedDate(v){const x=String(v??"").trim();if(!x)return true;return /^(0?[1-9]|[12]\d|3[01])[.\/-](0?[1-9]|1[0-2])[.\/-](20\d{2})$/.test(x)||/^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(x)}
 function issues(r){const result=[];if(!r.topic.trim())result.push(t("topicBad"));if(r.hours.trim()&&(!/^\d+(?:[.,]\d+)?$/.test(r.hours)||Number(r.hours.replace(",","."))<=0))result.push(t("hoursBad"));if(!normalizedDate(r.date))result.push(t("dateBad"));return result}
 function refreshPreviewLabels(){if(!$("previewPanel").hidden)renderRows()}
-function buildPreview(){if(!$("colTopic").value){status(t("noTopic"));return}const table=sheets[selectedSheet]?.data||[];const start=Number($("start").value);const col=id=>$(id).value===""?-1:Number($(id).value);const ix=[col("colTopic"),col("colDate"),col("colHours"),col("colGoals")];const relevant=table.slice(start).filter(r=>r.some(c=>String(c??"").trim()));if(relevant.length>500){status(t("tooMany"));return}rows=relevant.map((a,index)=>({num:start+index+1,topic:ix[0]<0?"":String(a[ix[0]]??""),date:ix[1]<0?"":String(a[ix[1]]??""),hours:ix[2]<0?"":String(a[ix[2]]??""),goals:ix[3]<0?"":String(a[ix[3]]??"")}));$("previewPanel").hidden=false;$("resultPanel").hidden=true;showStep(2);renderRows();$("previewPanel").scrollIntoView({behavior:"smooth"})}
+function buildPreview(){if(!$("colTopic").value){status(t("noTopic"));return}const table=sheets[selectedSheet]?.data||[];const start=Number($("start").value);const col=id=>$(id).value===""?-1:Number($(id).value);const ix=[col("colTopic"),col("colDate"),col("colHours"),col("colGoals")];const relevant=table.slice(start).filter(r=>!r._section&&r.some(c=>String(c??"").trim()));if(relevant.length>500){status(t("tooMany"));return}rows=relevant.map((a,index)=>({num:start+index+1,topic:ix[0]<0?"":String(a[ix[0]]??""),date:ix[1]<0?"":String(a[ix[1]]??""),hours:ix[2]<0?"":String(a[ix[2]]??""),goals:ix[3]<0?"":String(a[ix[3]]??"")}));$("previewPanel").hidden=false;$("resultPanel").hidden=true;showStep(2);renderRows();$("previewPanel").scrollIntoView({behavior:"smooth"})}
 function renderRows(){const body=$("previewRows");body.replaceChildren();const cols=["topic","date","hours","goals"];rows.forEach((r,i)=>{const tr=document.createElement("tr");const problem=issues(r);if(problem.length)tr.className="bad";const num=document.createElement("td");num.textContent=String(r.num);tr.append(num);cols.forEach(key=>{const td=document.createElement("td");if(key==="topic")td.className="topic";if(key==="goals")td.className="goal";const inp=document.createElement("input");inp.value=r[key];inp.setAttribute("aria-label",key+" "+(i+1));inp.addEventListener("change",()=>{r[key]=inp.value;updateChecks()});td.append(inp);tr.append(td)});const td=document.createElement("td");td.className="check";td.textContent=problem.length?problem.join(", "):t("valid");tr.append(td);body.append(tr)});updateChecks()}
 function updateChecks(){let n=0;[...$("previewRows").children].forEach((tr,i)=>{const found=issues(rows[i]);if(found.length)n++;tr.classList.toggle("bad",!!found.length);tr.querySelector(".check").textContent=found.length?found.join(", "):t("valid")});$("summary").textContent=t("found")+": "+rows.length+" · "+t("errCount")+": "+n;$("summary").className="note "+(n?"":"success");$("count").textContent=t("done")+": "+(rows.length-n)+"/"+rows.length;$("confirm").disabled=n>0||rows.length===0}
 function confirmPlan(){if(!rows.length||rows.some(r=>issues(r).length))return;confirmed=rows.map(r=>({...r}));$("resultPanel").hidden=false;showStep(3);$("result").textContent=confirmed.length+" "+t("success");$("resultPanel").scrollIntoView({behavior:"smooth"})}
@@ -65,7 +65,23 @@ $("sheet").addEventListener("change",()=>{selectedSheet=Number($("sheet").value)
 $("preview").addEventListener("click",buildPreview);$("confirm").addEventListener("click",confirmPlan);
 function extractDocxTables(html){
  const doc=new DOMParser().parseFromString(html,"text/html");
- const found=[...doc.querySelectorAll("table")].map((table,i)=>({name:"Word · "+(i+1),data:[...table.querySelectorAll("tr")].map(tr=>[...tr.children].filter(el=>/^(TD|TH)$/.test(el.tagName)).map(el=>(el.innerText||el.textContent||"").trim())).filter(row=>row.some(v=>v))})).filter(s=>s.data.length);
+ const found=[...doc.querySelectorAll("table")].map((table,i)=>{
+  const data=[...table.querySelectorAll("tr")].map(tr=>{
+   const cells=[...tr.children].filter(el=>/^(TD|TH)$/.test(el.tagName));
+   const row=[];let wide=false;
+   cells.forEach(el=>{
+    const value=(el.innerText||el.textContent||"").trim();
+    const span=Math.max(1,Math.min(50,Number(el.getAttribute("colspan"))||1));
+    if(span>=3)wide=true;
+    row.push(value);
+    for(let k=1;k<span;k++)row.push("");
+   });
+   const first=row.find(v=>v.trim())||"";
+   row._section=wide&&(/четверть|тоқсан/i.test(first)||/^\d{1,2}\.\d{1,2}\s*[A-Za-zА-Яа-яӘ-Яә-я]/u.test(first)||/^(повторение курса|қайталау)/i.test(first)&&cells.length<=2);
+   return row;
+  }).filter(row=>row.some(v=>v.trim()));
+  return {name:"Word · "+(i+1),data};
+ }).filter(s=>s.data.length);
  if(found.length)return found;
  const paragraphs=[...doc.body.querySelectorAll("p")].map(p=>p.textContent.trim()).filter(Boolean);
  return paragraphs.length?[{name:"Word · текст",data:paragraphs.map(p=>[p])}]:[];
@@ -87,10 +103,10 @@ $("file").addEventListener("change",async()=>{
    sheets=wb.SheetNames.map(name=>({name,data:XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:false,defval:"",blankrows:false})})).filter(s=>s.data.length);
   }
   if(!sheets.length){status(t("none"));return}
-  selectedSheet=0;$("sheet").replaceChildren();
+  selectedSheet=ext==="docx"?sheets.reduce((best,s,i)=>s.data.length>sheets[best].data.length?i:best,0):0;$("sheet").replaceChildren();
   sheets.forEach((s,i)=>opt($("sheet"),String(i),s.name));
   $("mappingPanel").hidden=false;$("previewPanel").hidden=true;$("resultPanel").hidden=true;$("fileStatus").hidden=true;
-  selectSheet();$("mappingPanel").scrollIntoView({behavior:"smooth"});
+  $("sheet").value=String(selectedSheet);selectSheet();$("mappingPanel").scrollIntoView({behavior:"smooth"});
  }catch(e){console.error("KTP import",e);status(t("readError"))}
 });
 translate();
