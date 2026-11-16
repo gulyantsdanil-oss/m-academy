@@ -47,7 +47,44 @@ function status(message,kind="error"){$("fileStatus").hidden=false;$("fileStatus
 function showStep(step){["step1","step2","step3"].forEach((id,i)=>$(id).classList.toggle("active",i===step-1))}
 function opt(select,value,label){const o=new Option(label,value);select.add(o)}
 function selectSheet(){const table=sheets[selectedSheet]?.data||[];$("header").replaceChildren();const len=Math.min(20,table.length);for(let i=0;i<len;i++){opt($("header"),String(i),(i+1)+": "+table[i].filter(Boolean).slice(0,3).join(" | ").slice(0,110))}let guessed=table.findIndex(row=>row.some(x=>/тема|тақырып|наименование|сабақтың тақырыбы/i.test(String(x))));$("header").value=String(Math.max(0,Math.min(guessed<0?0:guessed,len-1)));headerChanged()}
-function headerChanged(){const table=sheets[selectedSheet]?.data||[];const idx=Number($("header").value)||0;$("start").replaceChildren();for(let i=idx+1;i<Math.min(table.length,idx+15);i++)opt($("start"),String(i),String(i+1));const headers=(table[idx]||[]).map(String);const maxWidth=Math.min(80,Math.max(headers.length,...table.slice(idx+1,idx+6).map(r=>r.length),0));const cols=["colTopic","colDate","colHours","colGoals"];const patterns=[/тема|тақырып|наименование.*тем|содержание урок/i,/дата|күні|күн[іы]?|мерзім/i,/час|сағат|кол.?во часов/i,/цель|мақсат|оқыту мақ/i];for(let p=0;p<4;p++){const s=$(cols[p]);s.replaceChildren();opt(s,"",t("empty"));for(let j=0;j<maxWidth;j++)opt(s,String(j),String(j+1)+" · "+(headers[j]||"—"));const guess=headers.findIndex(h=>patterns[p].test(h.toLowerCase()));s.value=guess>=0?String(guess):""}if(!$("colTopic").value&&maxWidth)$("colTopic").value=String(Math.min(1,maxWidth-1))}
+function headerChanged(){
+ const table=sheets[selectedSheet]?.data||[],idx=Number($("header").value)||0;
+ $("start").replaceChildren();
+ for(let i=idx+1;i<Math.min(table.length,idx+15);i++)opt($("start"),String(i),String(i+1));
+ const headerRows=table.slice(Math.max(0,idx-2),Math.min(idx+3,table.length));
+ const maxWidth=Math.min(80,Math.max(...headerRows.map(r=>r.length),...table.slice(idx+1,idx+12).map(r=>r.length),0));
+ const cols=["colTopic","colDate","colHours","colGoals"];
+ const patterns=[/тем[аы]|тақырып|наименование.*тем|содержание.*(урок|раздел)/i,/дат[аы]|күні|мерзім/i,/час|сағат|кол.?во/i,/цел[ьи]|мақсат/i];
+ const headers=Array.from({length:maxWidth},(_,j)=>headerRows.map(r=>String(r[j]||"").trim()).filter(Boolean).join(" / "));
+ const samples=Array.from({length:maxWidth},(_,j)=>table.slice(idx+1,Math.min(idx+45,table.length)).map(r=>String(r[j]||"").trim()).filter(Boolean));
+ const goalCode=/\b\d{1,2}\.\d{1,2}\.\d{1,2}(?:\.\d+)?\b/;
+ const scores=Array.from({length:4},()=>Array(maxWidth).fill(0));
+ for(let j=0;j<maxWidth;j++){
+  const values=samples[j],n=Math.max(1,values.length),h=headers[j].toLowerCase();
+  for(let p=0;p<4;p++)if(patterns[p].test(h))scores[p][j]+=18;
+  if(/^[№#]|номер|реттік/i.test(h))scores[0][j]-=24;
+  const codeShare=values.filter(v=>goalCode.test(v)).length/n;
+  const dateShare=values.filter(v=>/^(?:\d{1,2}[.\/-]\d{1,2}[.\/-]20\d{2}|20\d{2}-\d{2}-\d{2})$/.test(v)).length/n;
+  const numericShare=values.filter(v=>/^\d+(?:[.,]\d+)?$/.test(v)&&Number(v)>0&&Number(v)<=8).length/n;
+  const wordsShare=values.filter(v=>v.length>12&&/[А-Яа-яӘәӨөҮүҰұҚқІіҒғҢң]/.test(v)).length/n;
+  scores[3][j]+=24*codeShare;
+  scores[2][j]+=18*numericShare;
+  scores[1][j]+=20*dateShare;
+  scores[0][j]+=12*wordsShare-23*codeShare-18*dateShare-18*numericShare;
+  if(/^(цель|мақсат)/i.test(h))scores[0][j]-=20;
+ }
+ const assigned=new Set();
+ const priority=[3,2,1,0];
+ for(const p of priority){
+  let best=-1,score=p===0?5:7;
+  for(let j=0;j<maxWidth;j++)if(!assigned.has(j)&&scores[p][j]>score){score=scores[p][j];best=j}
+  const select=$(cols[p]);select.replaceChildren();opt(select,"",t("empty"));
+  for(let j=0;j<maxWidth;j++)opt(select,String(j),String(j+1)+" · "+(headers[j]||"—").slice(0,85));
+  select.value=best===-1?"":String(best);
+  if(best>=0)assigned.add(best);
+ }
+ if(!$("colTopic").value)status(lang==="ru"?"Не удалось уверенно определить столбец «Тема». Выберите его вручную в шаге 2.":"«Тақырып» бағаны анықталмады. 2-қадамда қолмен таңдаңыз.","error");
+}
 function normalizedDate(v){const x=String(v??"").trim();if(!x)return true;return /^(0?[1-9]|[12]\d|3[01])[.\/-](0?[1-9]|1[0-2])[.\/-](20\d{2})$/.test(x)||/^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(x)}
 function issues(r){const result=[];if(!r.topic.trim())result.push(t("topicBad"));if(r.hours.trim()&&(!/^\d+(?:[.,]\d+)?$/.test(r.hours)||Number(r.hours.replace(",","."))<=0))result.push(t("hoursBad"));if(!normalizedDate(r.date))result.push(t("dateBad"));return result}
 function refreshPreviewLabels(){if(!$("previewPanel").hidden)renderRows()}
