@@ -46,15 +46,15 @@ function translate(){document.documentElement.lang=lang;ids.forEach(id=>$(id).te
 function status(message,kind="error"){$("fileStatus").hidden=false;$("fileStatus").className="note "+kind;$("fileStatus").textContent=message}
 function showStep(step){["step1","step2","step3"].forEach((id,i)=>$(id).classList.toggle("active",i===step-1))}
 function opt(select,value,label){const o=new Option(label,value);select.add(o)}
-function selectSheet(){const table=sheets[selectedSheet]?.data||[];$("header").replaceChildren();const len=Math.min(20,table.length);for(let i=0;i<len;i++){opt($("header"),String(i),(i+1)+": "+table[i].filter(Boolean).slice(0,3).join(" | ").slice(0,110))}let guessed=table.findIndex(row=>row.some(x=>/тема|тақырып|наименование|сабақтың тақырыбы/i.test(String(x))));$("header").value=String(Math.max(0,Math.min(guessed<0?0:guessed,len-1)));headerChanged()}
+function selectSheet(){const table=sheets[selectedSheet]?.data||[];$("header").replaceChildren();const len=Math.min(20,table.length);for(let i=0;i<len;i++){opt($("header"),String(i),(i+1)+": "+table[i].filter(Boolean).slice(0,3).join(" | ").slice(0,110))}let guessed=table.slice(0,Math.min(20,table.length)).findIndex(row=>row.some(x=>/^(?:тем[аы](?:\b|\/|\s)|тақырып(?:\b|\s)|наименование\s+тем|сабақтың\s+тақырыбы|содержание\s+раздела)/i.test(String(x).trim())));$("header").value=String(Math.max(0,Math.min(guessed<0?0:guessed,len-1)));headerChanged()}
 function headerChanged(){
  const table=sheets[selectedSheet]?.data||[],idx=Number($("header").value)||0;
  $("start").replaceChildren();
  for(let i=idx+1;i<Math.min(table.length,idx+15);i++)opt($("start"),String(i),String(i+1));
- const headerRows=table.slice(Math.max(0,idx-2),Math.min(idx+3,table.length));
+ const headerRows=[table[idx]||[]];
  const maxWidth=Math.min(80,Math.max(...headerRows.map(r=>r.length),...table.slice(idx+1,idx+12).map(r=>r.length),0));
  const cols=["colTopic","colDate","colHours","colGoals"];
- const patterns=[/тем[аы]|тақырып|наименование.*тем|содержание.*(урок|раздел)/i,/дат[аы]|күні|мерзім/i,/час|сағат|кол.?во/i,/цел[ьи]|мақсат/i];
+ const patterns=[/^(?:тем[аы](?:\b|\/|\s)|тақырып(?:\b|\s)|наименование\s+тем|содержание\s+раздела)/i,/^(?:дат[аы]|күні|мерзім)/i,/(?:кол.?во\s+часов|час(?:ов|а)?\b|сағат)/i,/(?:цели?\s+обучения|цел[ьи]|мақсат)/i];
  const headers=Array.from({length:maxWidth},(_,j)=>headerRows.map(r=>String(r[j]||"").trim()).filter(Boolean).join(" / "));
  const samples=Array.from({length:maxWidth},(_,j)=>table.slice(idx+1,Math.min(idx+45,table.length)).map(r=>String(r[j]||"").trim()).filter(Boolean));
  const goalCode=/\b\d{1,2}\.\d{1,2}\.\d{1,2}(?:\.\d+)?\b/;
@@ -63,6 +63,7 @@ function headerChanged(){
   const values=samples[j],n=Math.max(1,values.length),h=headers[j].toLowerCase();
   for(let p=0;p<4;p++)if(patterns[p].test(h))scores[p][j]+=18;
   if(/^[№#]|номер|реттік/i.test(h))scores[0][j]-=24;
+  if(!patterns[0].test(h)&&patterns[3].test(h))scores[0][j]-=25;
   const codeShare=values.filter(v=>goalCode.test(v)).length/n;
   const dateShare=values.filter(v=>/^(?:\d{1,2}[.\/-]\d{1,2}[.\/-]20\d{2}|20\d{2}-\d{2}-\d{2})$/.test(v)).length/n;
   const numericShare=values.filter(v=>/^\d+(?:[.,]\d+)?$/.test(v)&&Number(v)>0&&Number(v)<=8).length/n;
