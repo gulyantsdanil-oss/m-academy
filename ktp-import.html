@@ -92,7 +92,7 @@ function refreshPreviewLabels(){if(!$("previewPanel").hidden)renderRows()}
 function buildPreview(){if(!$("colTopic").value){status(t("noTopic"));return}const table=sheets[selectedSheet]?.data||[];const start=Number($("start").value);const col=id=>$(id).value===""?-1:Number($(id).value);const ix=[col("colTopic"),col("colDate"),col("colHours"),col("colGoals")];const relevant=table.slice(start).filter(r=>!r._section&&r.some(c=>String(c??"").trim()));if(relevant.length>500){status(t("tooMany"));return}rows=relevant.map((a,index)=>({num:start+index+1,topic:ix[0]<0?"":String(a[ix[0]]??""),date:ix[1]<0?"":String(a[ix[1]]??""),hours:ix[2]<0?"":String(a[ix[2]]??""),goals:ix[3]<0?"":String(a[ix[3]]??"")}));$("previewPanel").hidden=false;$("resultPanel").hidden=true;showStep(2);renderRows();$("previewPanel").scrollIntoView({behavior:"smooth"})}
 function renderRows(){const body=$("previewRows");body.replaceChildren();const cols=["topic","date","hours","goals"];rows.forEach((r,i)=>{const tr=document.createElement("tr");const problem=issues(r);if(problem.length)tr.className="bad";const num=document.createElement("td");num.textContent=String(r.num);tr.append(num);cols.forEach(key=>{const td=document.createElement("td");if(key==="topic")td.className="topic";if(key==="goals")td.className="goal";const inp=document.createElement("input");inp.value=r[key];inp.setAttribute("aria-label",key+" "+(i+1));inp.addEventListener("change",()=>{r[key]=inp.value;updateChecks()});td.append(inp);tr.append(td)});const td=document.createElement("td");td.className="check";td.textContent=problem.length?problem.join(", "):t("valid");tr.append(td);body.append(tr)});updateChecks()}
 function updateChecks(){let n=0;[...$("previewRows").children].forEach((tr,i)=>{const found=issues(rows[i]);if(found.length)n++;tr.classList.toggle("bad",!!found.length);tr.querySelector(".check").textContent=found.length?found.join(", "):t("valid")});$("summary").textContent=t("found")+": "+rows.length+" · "+t("errCount")+": "+n;$("summary").className="note "+(n?"":"success");$("count").textContent=t("done")+": "+(rows.length-n)+"/"+rows.length;$("confirm").disabled=n>0||rows.length===0}
-function confirmPlan(){if(!rows.length||rows.some(r=>issues(r).length))return;confirmed=rows.map(r=>({...r}));$("resultPanel").hidden=false;showStep(3);$("result").textContent=confirmed.length+" "+t("success");$("resultPanel").scrollIntoView({behavior:"smooth"})}
+function confirmPlan(){if(!rows.length||rows.some(r=>issues(r).length))return;confirmed=rows.map(r=>({...r}));$("resultPanel").hidden=false;showStep(3);savePlanLocal();$("resultPanel").scrollIntoView({behavior:"smooth"})}
 const LOCAL_KTP_KEY="m-academy-ktp-v1";
 function savePlanLocal(){
  if(!confirmed.length)return;
@@ -104,11 +104,13 @@ function savePlanLocal(){
   if(data[key]&&!confirm(lang==="ru"?"Для этого класса, предмета и года уже есть КТП. Заменить его?":"Бұл сынып, пән және жыл үшін КТЖ бар. Ауыстыру керек пе?"))return;
   data[key]={grade,subject,subjectLabel:$("subject").selectedOptions[0].textContent,year,updated:new Date().toISOString(),rows:confirmed.map(row=>({num:row.num,topic:row.topic,date:row.date,hours:row.hours,goals:row.goals}))};
   localStorage.setItem(LOCAL_KTP_KEY,JSON.stringify(data));
+  $("saveLocal").textContent=lang==="ru"?"✓ Сохранено в моих КТП":"✓ Менің КТЖ сақталды";
   const total=confirmed.reduce((sum,row)=>sum+(Number(String(row.hours).replace(",","."))||0),0);
   $("result").textContent=(lang==="ru"?"Сохранено в этом браузере: ":"Осы браузерде сақталды: ")+confirmed.length+(lang==="ru"?" строк, ":" жол, ")+total+(lang==="ru"?" часов. Откройте «Мои КТП». Рекомендуется также скачать CSV.":" сағат. «Менің КТЖ» бөліміне өтіңіз. CSV көшірмесін де жүктеңіз.");
  }catch(err){
   console.error("Local KTP save",err);
   $("result").textContent=lang==="ru"?"Не удалось сохранить КТП в браузере. Проверьте настройки хранилища и скачайте резервный CSV.":"КТЖ браузерде сақталмады. CSV көшірмесін жүктеңіз.";
+  $("saveLocal").textContent=lang==="ru"?"Повторить сохранение":"Қайта сақтау";
  }
 }
 $("saveLocal").addEventListener("click",savePlanLocal);
