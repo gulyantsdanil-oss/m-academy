@@ -104,18 +104,35 @@ $("preview").addEventListener("click",buildPreview);$("confirm").addEventListene
 function extractDocxTables(html){
  const doc=new DOMParser().parseFromString(html,"text/html");
  const found=[...doc.querySelectorAll("table")].map((table,i)=>{
+  const occupied=new Map();
   const data=[...table.querySelectorAll("tr")].map(tr=>{
    const cells=[...tr.children].filter(el=>/^(TD|TH)$/.test(el.tagName));
-   const row=[];let wide=false;
+   const row=[];let pos=0,wide=false;
+   const copyCarried=()=>{
+    while(occupied.has(pos)){
+     const carry=occupied.get(pos);
+     row[pos]=carry.value;
+     carry.remaining--;
+     if(carry.remaining<=0)occupied.delete(pos);
+     pos++;
+    }
+   };
    cells.forEach(el=>{
+    copyCarried();
     const value=(el.innerText||el.textContent||"").trim();
     const span=Math.max(1,Math.min(50,Number(el.getAttribute("colspan"))||1));
+    const height=Math.max(1,Math.min(500,Number(el.getAttribute("rowspan"))||1));
     if(span>=3)wide=true;
-    row.push(value);
-    for(let k=1;k<span;k++)row.push("");
+    for(let k=0;k<span;k++){
+     row[pos]=k===0?value:"";
+     if(height>1)occupied.set(pos,{value:k===0?value:"",remaining:height-1});
+     pos++;
+    }
    });
+   while([...occupied.keys()].some(k=>k>=pos)&&pos<100)copyCarried();
+   for(let j=0;j<row.length;j++)if(row[j]===undefined)row[j]="";
    const first=row.find(v=>v.trim())||"";
-   row._section=wide&&(/четверть|тоқсан/i.test(first)||/^\d{1,2}\.\d{1,2}\s*[^\d\s]/.test(first)||/^(повторение курса|қайталау)/i.test(first)&&cells.length<=2);
+   row._section=wide&&(/четверть|тоқсан/i.test(first)||/^\\d{1,2}\\.\\d{1,2}\\s*[^\\d\\s]/.test(first)||/^(повторение курса|қайталау)/i.test(first)&&cells.length<=2);
    return row;
   }).filter(row=>row.some(v=>v.trim()));
   return {name:"Word · "+(i+1),data};
