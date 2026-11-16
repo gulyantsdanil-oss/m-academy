@@ -129,7 +129,7 @@ function extractDocxTables(html){
      pos++;
     }
    });
-   while([...occupied.keys()].some(k=>k>=pos)&&pos<100)copyCarried();
+   while(occupied.size&&pos<=Math.max(...occupied.keys())&&pos<100){if(!occupied.has(pos)){row[pos]="";pos++;}else copyCarried();}
    for(let j=0;j<row.length;j++)if(row[j]===undefined)row[j]="";
    const first=row.find(v=>v.trim())||"";
    row._section=wide&&(/четверть|тоқсан/i.test(first)||/^\\d{1,2}\\.\\d{1,2}\\s*[^\\d\\s]/.test(first)||/^(повторение курса|қайталау)/i.test(first)&&cells.length<=2);
