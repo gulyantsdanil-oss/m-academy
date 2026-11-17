@@ -210,7 +210,7 @@ function wordCell(content,{width=1700,bold=false}={}){
 function wordTable(rows,widths,{headers=false}={}){
  const total=widths.reduce((a,b)=>a+b,0);
  const grid=widths.map(w=>'<w:gridCol w:w="'+w+'"/>').join("");
- const trs=rows.map((row,i)=>'<w:tr>'+(headers&&i===0?'<w:trPr><w:tblHeader w:val="true"/></w:trPr>':"")+row.map((value,j)=>wordCell(value,{width:widths[j],bold:headers&&i===0})).join("")+'</w:tr>').join("");
+ const trs=rows.map((row,i)=>'<w:tr><w:trPr><w:cantSplit/>'+(headers&&i===0?'<w:tblHeader w:val="true"/>':"")+'</w:trPr>'+row.map((value,j)=>wordCell(value,{width:widths[j],bold:headers&&i===0})).join("")+'</w:tr>').join("");
  return '<w:tbl><w:tblPr><w:tblW w:w="'+total+'" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="5"/><w:left w:val="single" w:sz="5"/><w:bottom w:val="single" w:sz="5"/><w:right w:val="single" w:sz="5"/><w:insideH w:val="single" w:sz="5"/><w:insideV w:val="single" w:sz="5"/></w:tblBorders></w:tblPr><w:tblGrid>'+grid+'</w:tblGrid>'+trs+'</w:tbl>';
 }
 function makeDocxXml(){
@@ -268,10 +268,25 @@ function makeDocxBlob(){
 }
 function exportDocx(){
  renderDocument();
+ const missingFields=missing();
+ if(missingFields.length){
+  $("status").textContent=t("required")+missingFields.join(", ");
+  $("status").style.color="#B45309";
+  $("status").scrollIntoView({behavior:"smooth",block:"center"});
+  return;
+ }
+ if(phases.some(p=>!String(p.teacher||"").trim()||!String(p.student||"").trim()||!String(p.evaluation||"").trim()||!String(p.resources||"").trim())){
+  $("status").textContent=lang==="ru"?"Перед экспортом заполните действия педагога, ученика, оценивание и ресурсы в каждом этапе.":"Экспорт алдында әр кезеңнің педагог әрекеті, оқушы әрекеті, бағалау және ресурстар бағандарын толтырыңыз.";
+  $("status").style.color="#B45309";
+  $("status").scrollIntoView({behavior:"smooth",block:"center"});
+  return;
+ }
+ $("status").style.color="#0F766E";
  try{
   const blob=makeDocxBlob(),url=URL.createObjectURL(blob),a=document.createElement("a");
   const grade=($("grade").value||"class").replace(/[^\wА-Яа-яӘәҚқҒғІіӨөҰұҮүЁё0-9-]/g,"-");
-  a.href=url;a.download="KSP-"+grade+"-"+($("date").value||"lesson")+".docx";
+  const topic=($("topic").value||"lesson").trim().slice(0,55).replace(/[^\wА-Яа-яӘәҚқҒғІіӨөҰұҮүЁё0-9-]/g,"-");
+  a.href=url;a.download="KSP-"+grade+"-"+topic+"-"+($("date").value||"date")+".docx";
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   $("status").textContent=lang==="ru"?"DOCX загружен. Проверьте поля и структуру перед сдачей.":"DOCX жүктелді. Тапсырар алдында өрістер мен құрылымды тексеріңіз.";
  }catch(error){$("status").textContent=lang==="ru"?"Не удалось создать DOCX: "+error.message:"DOCX жасау мүмкін болмады: "+error.message}
