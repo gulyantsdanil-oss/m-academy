@@ -36,7 +36,12 @@ function getLesson(){
  const params=new URLSearchParams(location.search);
  let lesson=null;
  try{lesson=JSON.parse(sessionStorage.getItem("m-academy-ksp-lesson")||"null")||JSON.parse(sessionStorage.getItem("m-academy-current-lesson")||"null")}catch{}
- if(params.has("topic"))lesson={grade:params.get("grade")||"",row:{topic:params.get("topic")||""},subject:params.get("subject")||"",year:"2026–2027"};
+ if(params.has("topic")){
+  const topic=params.get("topic")||"",grade=params.get("grade")||"",subject=params.get("subject")||"";
+  if(!lesson||lesson.row?.topic!==topic||String(lesson.grade)!==grade){
+   lesson={grade,row:{num:"Каталог",topic,goals:""},subject,year:"2026–2027",index:0};
+  }
+ }
  return lesson;
 }
 function draftKey(lesson){
@@ -84,6 +89,7 @@ function fillGuidance(){
 function initialize(){
  const lesson=getLesson();
  if(lesson?.row?.topic){$("topic").value=lesson.row.topic;$("grade").value=lesson.grade||"";$("learning").value=lesson.row.goals||""}
+ if(!lesson?.row?.topic){$("status").textContent=lang==="ru"?"Для автоматического заполнения откройте тему в Lesson Studio и нажмите «Оформить КСП № 130».":"Автоматты толтыру үшін Lesson Studio-да тақырыпты ашып, «№ 130 ҚМЖ рәсімдеу» батырмасын басыңыз."}
  const draft=loadDraft(lesson);
  if(draft){$("objectives").value=draft.goals||$("objectives").value}
  let source=null;try{source=JSON.parse(sessionStorage.getItem("m-academy-ksp-draft")||"null")}catch{}
@@ -100,6 +106,7 @@ function initialize(){
   const previous=JSON.parse(localStorage.getItem("m-academy-ksp-v1")||"{}")[key];
   if(previous&&previous.fields){for(const [id,v] of Object.entries(previous.fields)){if(sourceFields.includes(id))$(id).value=v}phases=previous.phases||phases}
  }catch{}
+ fillGuidance();
  renderEditor();translate();renderDocument();
 }
 function planStorageKey(){return[ $("grade").value.trim(),$("topic").value.trim(),getLesson()?.subject||""].join("::")}
