@@ -1,0 +1,100 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>M-academy · Банк заданий</title><style>
+:root{--navy:#101B35;--blue:#2563EB;--line:#DCE5F2;--muted:#61738C}*{box-sizing:border-box}body{margin:0;background:#F3F6FC;color:var(--navy);font:15px system-ui,-apple-system,"Segoe UI",sans-serif}header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:4}.top{max-width:1240px;margin:auto;padding:13px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.brand{font-size:23px;font-weight:850;text-decoration:none;color:var(--navy)}.brand b{color:var(--blue)}.nav{display:flex;gap:10px;flex-wrap:wrap}.btn{padding:10px 14px;border:1px solid #D6E2F1;background:white;border-radius:10px;color:var(--navy);font:inherit;font-weight:700;cursor:pointer;text-decoration:none}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.active{border-color:var(--blue);background:#E8F0FF;color:var(--blue)}main{max-width:1240px;margin:auto;padding:32px 22px 80px}.eyebrow{font-size:12px;letter-spacing:1.4px;color:var(--blue);font-weight:800}h1{font-size:clamp(29px,3.8vw,44px);margin:7px 0}p{line-height:1.6}.muted{color:var(--muted)}.panel{background:white;border:1px solid var(--line);border-radius:17px;padding:22px;margin:18px 0;box-shadow:0 9px 30px #152A4F09}.form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.field{min-width:0}label{font-size:13px;font-weight:750;display:block;margin-bottom:7px}select,input{font:inherit;border:1px solid #CAD8EB;background:white;border-radius:9px;padding:10px 12px;width:100%}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.notice{padding:12px 14px;border:1px solid #EBCF95;border-radius:12px;background:#FFF8E9;color:#865317;font-size:13px}.tasks{display:grid;gap:13px}.task{border:1px solid var(--line);border-radius:12px;padding:17px 18px;background:#FBFDFF}.taskhead{display:flex;align-items:center;justify-content:space-between;gap:12px}.level{background:#EAF1FF;color:#1D4ED8;border-radius:30px;padding:4px 9px;font-size:12px;font-weight:800}.question{font-size:17px;font-weight:600;line-height:1.5;margin:12px 0}.response{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.response input{max-width:210px}.feedback{font-size:14px;min-height:20px;color:#0F766E}.answer{white-space:pre-wrap;background:#EFFAF6;border:1px solid #BBE4D0;padding:12px;border-radius:9px;margin-top:10px;line-height:1.6}.answer[hidden]{display:none}.stat{font-size:14px;font-weight:700;padding:12px;background:#EFF6FF;border-radius:10px}.help{margin-top:11px;font-size:13px;color:var(--muted)}.badge{font-size:13px;color:#64748B}.teacheronly[hidden]{display:none!important}@media(max-width:800px){.form{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:23px 14px}.panel{padding:15px}}@media print{header,.config,.response,.actions,.notice,.teacherSwitch,.help,#status{display:none!important}main{padding:0}.panel{border:0;box-shadow:none;margin:0;padding:4px}.task{break-inside:avoid}.answer[hidden]{display:none}.tasks{gap:8px}body{background:white}}
+</style></head><body><header><div class="top"><a class="brand" href="./index.html"><b>M</b>-academy</a><div class="nav"><a class="btn" href="./catalog.html" id="catalogLink">Каталог 5–11</a><a class="btn" href="./workspace.html#studio" id="studioLink">Lesson Studio</a><a class="btn" href="./ksp.html" id="kspLink">КСП №130</a><button class="btn" type="button" id="language">ҚАЗ</button></div></div></header><main><div class="eyebrow">M-ACADEMY · MATH TASK BANK</div><h1 id="heading">Генератор математических заданий</h1><p class="muted" id="intro">Создание проверяемых вариантов с разными числовыми параметрами. Ответы ученика проверяются локально. Для учителя — ключи и решения.</p><div class="notice" id="notice">Демонстрационная версия. Задания вычисляются в браузере и не собирают персональные данные. Учитель должен проверить соответствие задач учебным целям перед использованием. Версии для учеников и учителя — режимы отображения, а не защищённые кабинеты.</div><section class="panel config"><div class="form"><div class="field"><label for="subject" id="subjectLabel">Тема</label><select id="subject"><option value="progression">9 класс · Арифметическая прогрессия</option><option value="quadratic">8 класс · Квадратные уравнения</option><option value="rational">6 класс · Рациональные числа</option></select></div><div class="field"><label for="level" id="levelLabel">Уровень</label><select id="level"><option value="all">Все уровни</option><option value="A">A · Базовый</option><option value="B">B · Средний</option><option value="C">C · Повышенный</option></select></div><div class="field"><label for="quantity" id="quantityLabel">Количество заданий</label><select id="quantity"><option value="6">6</option><option value="9">9</option><option value="12">12</option></select></div><div class="field"><label for="variant" id="variantLabel">Вариант</label><input id="variant" type="number" min="1" max="99999" value="1"></div></div><div class="actions"><button id="generate" type="button" class="btn primary">Создать вариант</button><button id="showStudent" type="button" class="btn active teacherSwitch">Ученик · без ответов</button><button id="showTeacher" type="button" class="btn teacherSwitch">Учитель · с решениями</button><button id="print" type="button" class="btn">Печать / PDF</button><button id="export" type="button" class="btn">Скачать TXT</button></div><div id="status" class="stat" aria-live="polite"></div></section><section class="panel"><h2 id="worksheetTitle">Рабочий лист</h2><div class="badge" id="worksheetMeta"></div><div class="tasks" id="tasks"></div><p class="help" id="footerHelp">Ответ можно ввести десятичной дробью (точка или запятая). Результаты не отправляются на сервер.</p></section></main><script>
+const $=id=>document.getElementById(id);
+let lang="ru";try{lang=localStorage.getItem("m-academy-lang")==="kk"?"kk":"ru"}catch{}
+const txt={ru:{heading:"Генератор математических заданий",intro:"Создание проверяемых вариантов с разными числовыми параметрами. Ответы ученика проверяются локально. Для учителя — ключи и решения.",notice:"Демонстрационная версия. Задания вычисляются в браузере и не собирают персональные данные. Учитель должен проверить соответствие задач учебным целям. Режимы ученика и учителя не являются защищёнными кабинетами.",subjectLabel:"Тема",levelLabel:"Уровень",quantityLabel:"Количество заданий",variantLabel:"Вариант",generate:"Создать вариант",showStudent:"Ученик · без ответов",showTeacher:"Учитель · с решениями",print:"Печать / PDF",export:"Скачать TXT",worksheetTitle:"Рабочий лист",footerHelp:"Числовой ответ можно ввести через точку или запятую. Результаты не отправляются на сервер.",catalogLink:"Каталог 5–11",kspLink:"КСП №130",level:["Все уровни","A · Базовый","B · Средний","C · Повышенный"],topics:["9 класс · Арифметическая прогрессия","8 класс · Квадратные уравнения","6 класс · Рациональные числа"],answer:"Ответ",check:"Проверить",correct:"Верно!",incorrect:"Неверно. Попробуйте ещё раз.",invalid:"Введите число.",solution:"Решение для учителя",score:"Правильно решено",of:"из",variantWord:"вариант",teacher:"Ключи к заданиям",student:"Задания для учащихся",task:"Задание"},kk:{heading:"Математика тапсырмаларының генераторы",intro:"Сандық параметрлері өзгеретін тапсырмалар. Оқушы жауабы браузерде тексеріледі, мұғалімге жауап пен шешім беріледі.",notice:"Демонстрациялық нұсқа. Тапсырмалар браузерде есептеледі және жеке деректер жиналмайды. Мұғалім тапсырмалардың оқу мақсаттарына сәйкестігін тексеруі керек. Оқушы/мұғалім режимдері қорғалған кабинет емес.",subjectLabel:"Тақырып",levelLabel:"Деңгей",quantityLabel:"Тапсырма саны",variantLabel:"Нұсқа",generate:"Нұсқа құру",showStudent:"Оқушы · жауапсыз",showTeacher:"Мұғалім · шешіммен",print:"Басып шығару / PDF",export:"TXT жүктеу",worksheetTitle:"Жұмыс парағы",footerHelp:"Жауапты нүкте немесе үтірмен енгізуге болады. Нәтижелер серверге жіберілмейді.",catalogLink:"5–11 каталогы",kspLink:"№130 ҚМЖ",level:["Барлық деңгей","A · Базалық","B · Орта","C · Жоғары"],topics:["9-сынып · Арифметикалық прогрессия","8-сынып · Квадрат теңдеулер","6-сынып · Рационал сандар"],answer:"Жауап",check:"Тексеру",correct:"Дұрыс!",incorrect:"Қате. Қайта көріңіз.",invalid:"Сан енгізіңіз.",solution:"Мұғалімге арналған шешімі",score:"Дұрыс жауап",of:"ішінен",variantWord:"нұсқа",teacher:"Тапсырмалар жауабы",student:"Оқушы тапсырмалары",task:"Тапсырма"}};
+const T=k=>txt[lang][k]||k;
+const params=new URLSearchParams(location.search),initialTopic=params.get("topic")||"";
+if(/арифметич|арифметикал/i.test(initialTopic))$("subject").value="progression";
+else if(/квадратн|квадрат теңдеу/i.test(initialTopic))$("subject").value="quadratic";
+else if(/рационал/i.test(initialTopic))$("subject").value="rational";
+const clamp=(n,lo,hi)=>Math.max(lo,Math.min(hi,n));
+const fmt=x=>Number.isInteger(x)?String(x):Number(x.toFixed(6)).toString();
+const signed=x=>x>=0?"+ "+x:"− "+Math.abs(x);
+function rngFor(s){let seed=s>>>0;return()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}};
+function integer(rand,lo,hi){return lo+Math.floor(rand()*(hi-lo+1))}
+function nonzero(rand,lo,hi){let n=0;while(!n)n=integer(rand,lo,hi);return n}
+const nth=(a,d,n)=>a+(n-1)*d;
+function progression(level,r){
+ const a=integer(r,-12,15),d=nonzero(r,-7,7),n=integer(r,6,17),x=nth(a,d,n);
+ if(level==="A"){const q=integer(r,3,7);return {q:{ru:"В арифметической прогрессии a₁ = "+a+", d = "+d+". Найдите a"+q+".",kk:"Арифметикалық прогрессияда a₁ = "+a+", d = "+d+". a"+q+" табыңыз."},ans:nth(a,d,q),solution:"a"+q+" = "+a+" + ("+q+" − 1)·("+d+") = "+nth(a,d,q)}}
+ if(level==="B")return {q:{ru:"Найдите a"+n+" арифметической прогрессии, если a₁ = "+a+" и d = "+d+".",kk:"a₁ = "+a+" және d = "+d+" болса, арифметикалық прогрессияның a"+n+" мүшесін табыңыз."},ans:x,solution:"a"+n+" = "+a+" + ("+n+" − 1)·("+d+") = "+x};
+ const i=integer(r,2,5),j=i+integer(r,3,7),ai=nth(a,d,i),aj=nth(a,d,j);
+ return {q:{ru:"Для арифметической прогрессии a"+i+" = "+ai+", a"+j+" = "+aj+". Найдите a₁.",kk:"Арифметикалық прогрессияда a"+i+" = "+ai+", a"+j+" = "+aj+". a₁ табыңыз."},ans:a,solution:"d = ("+aj+" − ("+ai+")) / ("+j+" − "+i+") = "+d+"; a₁ = "+ai+" − ("+i+" − 1)·("+d+") = "+a}
+}
+function quadratic(level,r){
+ if(level==="A"){
+  const k=integer(r,1,12);return {q:{ru:"Решите уравнение x² = "+k*k+". Укажите положительный корень.",kk:"x² = "+k*k+" теңдеуін шешіңіз. Оң түбірін көрсетіңіз."},ans:k,solution:"x = ±√"+(k*k)+" = ±"+k+"; положительный корень "+k};
+ }
+ const root=integer(r,-8,8),other=level==="C"?nonzero(r,-8,8):integer(r,-8,8);
+ const b=-(root+other),c=root*other;
+ if(level==="B")return{q:{ru:"Один корень уравнения x² "+signed(b)+"x "+signed(c)+" = 0 равен "+root+". Найдите второй корень.",kk:"x² "+signed(b)+"x "+signed(c)+" = 0 теңдеуінің бір түбірі "+root+". Екінші түбірін табыңыз."},ans:other,solution:"По Виету x₁ + x₂ = "+(-b)+"; x₂ = "+(-b)+" − ("+root+") = "+other};
+ const factor=integer(r,2,4),B=b*factor,C=c*factor;
+ return{q:{ru:"Уравнение "+factor+"x² "+signed(B)+"x "+signed(C)+" = 0 имеет корень "+root+". Найдите другой корень.",kk:factor+"x² "+signed(B)+"x "+signed(C)+" = 0 теңдеуінің бір түбірі "+root+". Екінші түбірін табыңыз."},ans:other,solution:"Делим на "+factor+": x² "+signed(b)+"x "+signed(c)+" = 0. Сумма корней = "+(-b)+"; второй корень "+other}
+}
+function rational(level,r){
+ const a=nonzero(r,-12,12),b=nonzero(r,-12,12);
+ if(level==="A"){const ans=a+b;return{q:{ru:"Вычислите: ("+a+") + ("+b+").",kk:"Есептеңіз: ("+a+") + ("+b+")."},ans,solution:a+" + ("+b+") = "+ans}}
+ if(level==="B"){const ans=a*b;return{q:{ru:"Вычислите: ("+a+") · ("+b+").",kk:"Есептеңіз: ("+a+") · ("+b+")."},ans,solution:a+" · ("+b+") = "+ans}}
+ const divisor=nonzero(r,-9,9),quotient=nonzero(r,-9,9),dividend=divisor*quotient;
+ return{q:{ru:"Вычислите: ("+dividend+") : ("+divisor+").",kk:"Есептеңіз: ("+dividend+") : ("+divisor+")."},ans:quotient,solution:dividend+" : ("+divisor+") = "+quotient}
+}
+const generators={progression,quadratic,rational};let mode="student",items=[],correct=new Set();
+function generate(){
+ const count=Number($("quantity").value),topic=$("subject").value,lvl=$("level").value,v=clamp(Number($("variant").value)||1,1,99999);
+ const seed=([...topic].reduce((s,ch)=>Math.imul(31,s)+ch.charCodeAt(0),0)^Math.imul(v,7919)^({all:59,A:101,B:503,C:907}[lvl]))>>>0;
+ const rand=rngFor(seed);items=[];correct=new Set();
+ for(let i=0;i<count;i++){const level=lvl==="all"?["A","B","C"][i%3]:lvl;items.push({...generators[topic](level,rand),level})}
+ render();
+}
+function answerNumber(raw){const s=String(raw).trim().replace(",",".").replace(/\s/g,"");if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(s))return null;const n=Number(s);return Number.isFinite(n)?n:null}
+function check(i,input,feedback){
+ const n=answerNumber(input.value),d=items[i];
+ if(n===null){feedback.textContent=T("invalid");feedback.style.color="#B45309";return}
+ if(Math.abs(n-d.ans)<=1e-7){correct.add(i);feedback.textContent=T("correct");feedback.style.color="#047857"}else{correct.delete(i);feedback.textContent=T("incorrect");feedback.style.color="#B45309"}
+ updateStatus()
+}
+function updateStatus(){$("status").textContent=T("score")+": "+correct.size+" "+T("of")+" "+items.length}
+function render(){
+ const holder=$("tasks");holder.replaceChildren();
+ $("worksheetTitle").textContent=mode==="student"?T("student"):T("teacher");
+ $("worksheetMeta").textContent=T("topics")[["progression","quadratic","rational"].indexOf($("subject").value)]+" · "+T("variantWord")+" "+$("variant").value;
+ items.forEach((item,i)=>{
+  const card=document.createElement("article");card.className="task";
+  const head=document.createElement("div");head.className="taskhead";
+  const label=document.createElement("strong");label.textContent=T("task")+" "+(i+1);
+  const badge=document.createElement("span");badge.className="level";badge.textContent=item.level;head.append(label,badge);
+  const q=document.createElement("div");q.className="question";q.textContent=item.q[lang];
+  card.append(head,q);
+  const row=document.createElement("div");row.className="response";row.hidden=mode==="teacher";
+  const input=document.createElement("input");input.type="text";input.inputMode="decimal";input.placeholder=T("answer");input.setAttribute("aria-label",T("task")+" "+(i+1)+" — "+T("answer"));
+  const btn=document.createElement("button");btn.className="btn";btn.type="button";btn.textContent=T("check");
+  const feed=document.createElement("span");feed.className="feedback";btn.addEventListener("click",()=>check(i,input,feed));input.addEventListener("keydown",e=>{if(e.key==="Enter")check(i,input,feed)});
+  row.append(input,btn,feed);card.append(row);
+  const solution=document.createElement("div");solution.className="answer";solution.hidden=mode!=="teacher";solution.textContent=T("solution")+": "+item.solution+"; "+T("answer")+": "+fmt(item.ans);
+  card.append(solution);holder.append(card);
+ });
+ $("showStudent").classList.toggle("active",mode==="student");$("showTeacher").classList.toggle("active",mode==="teacher");updateStatus();
+}
+function translate(){
+ document.documentElement.lang=lang;
+ for(const id of ["heading","intro","notice","subjectLabel","levelLabel","quantityLabel","variantLabel","generate","showStudent","showTeacher","print","export","footerHelp","catalogLink","kspLink"])$(id).textContent=T(id);
+ $("language").textContent=lang==="ru"?"ҚАЗ":"РУС";
+ [...$("subject").options].forEach((x,i)=>x.textContent=T("topics")[i]);
+ [...$("level").options].forEach((x,i)=>x.textContent=T("level")[i]);
+ render();
+}
+$("generate").addEventListener("click",generate);
+$("showStudent").addEventListener("click",()=>{mode="student";render()});
+$("showTeacher").addEventListener("click",()=>{mode="teacher";render()});
+$("language").addEventListener("click",()=>{lang=lang==="ru"?"kk":"ru";try{localStorage.setItem("m-academy-lang",lang)}catch{}translate()});
+$("print").addEventListener("click",()=>window.print());
+$("export").addEventListener("click",()=>{
+ const lines=["M-academy",T("topics")[["progression","quadratic","rational"].indexOf($("subject").value)],T("variantWord")+": "+$("variant").value,""];
+ items.forEach((q,i)=>lines.push((i+1)+". ["+q.level+"] "+q.q[lang],...(mode==="teacher"?[T("answer")+": "+fmt(q.ans),T("solution")+": "+q.solution]:[]),""));
+ const blob=new Blob(["\uFEFF"+lines.join("\n")],{type:"text/plain;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="m-academy-tasks-"+$("subject").value+"-"+$("variant").value+"-"+mode+".txt";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+generate();translate();
+</script></body></html>
