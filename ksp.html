@@ -57,14 +57,14 @@ function initialize(){
  const lesson=getLesson();
  if(lesson?.row?.topic){$("topic").value=lesson.row.topic;$("grade").value=lesson.grade||"";$("learning").value=lesson.row.goals||""}
  const draft=loadDraft(lesson);
- if(draft){$("learning").value=draft.goals||$("learning").value}
+ if(draft){$("objectives").value=draft.goals||$("objectives").value}
  let source=null;try{source=JSON.parse(sessionStorage.getItem("m-academy-ksp-draft")||"null")}catch{}
  if(source&&lesson&&source.key===draftKey(lesson)){
-  if(source.goals)$("learning").value=source.goals;
+  if(source.goals)$("objectives").value=source.goals;
   if(source.parts?.length)phases=source.parts.map((part,i)=>createPhase(i,part||""));
  }
  if(!phases.length)phases=Array.from({length:7},(_,i)=>createPhase(i,draft?.parts?.[i]||""));
- // Reuse objectives when official learning goals have already been set in the Studio.
+ // Keep statutory learning objectives sourced from KTP only; Studio draft goals are editable lesson objectives.
  if(lesson?.grade){$("grade").value=lesson.grade}
  const key=planStorageKey();
  try{
