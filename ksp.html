@@ -123,7 +123,7 @@ function renderEditor(){
 function sumMinutes(){$("sumTime").textContent=phases.reduce((n,p)=>n+(Number(p.minutes)||0),0)+" "+t("minutes")}
 function fields(){return Object.fromEntries(sourceFields.map(id=>[id,$(id).value.trim()]))}
 function missing(){
- const f=fields(),values=[["school",t("schoolL")],["teacher",t("teacherL")],["section",t("sectionL")],["date",t("dateL")],["grade",t("gradeL")],["topic",t("noTopic")],["learning",t("noGoals")],["objectives",t("noObjectives")]];
+ const f=fields(),values=[["school",t("schoolL")],["teacher",t("teacherL")],["section",t("sectionL")],["date",t("dateL")],["grade",t("gradeL")],["present",t("presentL")],["absent",t("absentL")],["topic",t("noTopic")],["learning",t("noGoals")],["objectives",t("noObjectives")]];
  return values.filter(([id])=>!f[id]).map(([,name])=>name)
 }
 function row(label,value){return'<tr><td class="firstcol"><strong>'+esc(label)+'</strong></td><td colspan="4" class="pre">'+esc(value||"—")+'</td></tr>'}
