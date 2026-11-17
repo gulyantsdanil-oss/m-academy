@@ -51,7 +51,7 @@ function percent(level,r){
  return{q:{ru:"Число "+fmt(part)+" составляет "+p+"% неизвестного числа. Найдите это число.",kk:fmt(part)+" саны белгісіз санның "+p+"%-ын құрайды. Белгісіз санды табыңыз."},ans:base,solution:fmt(part)+" · 100 / "+p+" = "+base}
 }
 function linear(level,r){
- const a=nonzero(r,-6,6),b=integer(r,-12,12),x=integer(r,-8,8),y=a*x+b;
+ const a=nonzero(r,-6,6),b=integer(r,-12,12),x=nonzero(r,-8,8),y=a*x+b;
  if(level==="A")return{q:{ru:"Для y = "+a+"x "+signed(b)+" найдите y при x = "+x+".",kk:"y = "+a+"x "+signed(b)+" функциясында x = "+x+" болса, y табыңыз."},ans:y,solution:"y = "+a+"·("+x+") "+signed(b)+" = "+y};
  if(level==="B")return{q:{ru:"Точка ("+x+"; "+y+") принадлежит графику y = kx "+signed(b)+". Найдите k.",kk:"("+x+"; "+y+") нүктесі y = kx "+signed(b)+" графигінде жатыр. k табыңыз."},ans:a,solution:"k = ("+y+" − ("+b+"))/("+x+") = "+a,requiresNonzeroX:true};
  const delta=nonzero(r,-6,6),y2=a*(x+delta)+b;
@@ -64,12 +64,15 @@ function roots(level,r){
  const j=integer(r,1,10);return{q:{ru:"Вычислите √"+(k*k*j*j)+" / √"+j*j+".",kk:"√"+(k*k*j*j)+" / √"+j*j+" мәнін есептеңіз."},ans:k,solution:(k*j)+" / "+j+" = "+k}
 }
 function trig(level,r){
- const deg=[0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330][integer(r,0,15)],val=Math.round(Math.sin(deg*Math.PI/180)*1e10)/1e10;
+ const deg=[0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330][integer(r,0,15)];
+ const val=Math.round(Math.sin(deg*Math.PI/180)*1e10)/1e10;
  if(level==="A")return{q:{ru:"Найдите sin "+deg+"° (ответ числом, допустима десятичная дробь).",kk:"sin "+deg+"° мәнін табыңыз (жауабы сан түрінде)."},ans:val,solution:"sin "+deg+"° = "+fmt(val)};
- const n=integer(r,-3,3),a=integer(r,1,6),rhs=a*n;
- if(level==="B")return{q:{ru:"Решите уравнение "+a+" sin x = "+rhs+". Найдите значение sin x.",kk:a+" sin x = "+rhs+" теңдеуінен sin x мәнін табыңыз."},ans:n,solution:"sin x = "+rhs+"/"+a+" = "+n+(Math.abs(n)>1?"; действительных x нет":"")};
- const shift=integer(r,1,7),result=integer(r,-1,1),v=result-shift;
- return{q:{ru:"Если sin x + "+shift+" = "+result+", найдите sin x.",kk:"sin x + "+shift+" = "+result+" болса, sin x мәнін табыңыз."},ans:v,solution:"sin x = "+result+" − "+shift+" = "+v+(Math.abs(v)>1?"; действительных x нет":"")};
+ if(level==="B"){
+  const coef=integer(r,1,6),target=[-1,-0.5,0,0.5,1][integer(r,0,4)],rhs=coef*target;
+  return{q:{ru:"Из уравнения "+coef+" sin x = "+fmt(rhs)+" найдите значение sin x.",kk:coef+" sin x = "+fmt(rhs)+" теңдеуінен sin x мәнін табыңыз."},ans:target,solution:"sin x = "+fmt(rhs)+" / "+coef+" = "+fmt(target)};
+ }
+ const shift=integer(r,1,7),target=[-1,-0.5,0,0.5,1][integer(r,0,4)],rhs=target+shift;
+ return{q:{ru:"Если sin x + "+shift+" = "+fmt(rhs)+", найдите sin x.",kk:"sin x + "+shift+" = "+fmt(rhs)+" болса, sin x мәнін табыңыз."},ans:target,solution:"sin x = "+fmt(rhs)+" − "+shift+" = "+fmt(target)};
 }
 const generators={progression,quadratic,rational,percent,linear,roots,trig};let mode="student",items=[],correct=new Set();
 function generate(){
