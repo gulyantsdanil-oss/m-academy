@@ -149,7 +149,8 @@ function openOfficialKsp(){
   sessionStorage.setItem("m-academy-ksp-lesson",JSON.stringify(selectedLesson));
   sessionStorage.setItem("m-academy-ksp-draft",JSON.stringify({key:lessonStorageKey(),goals:lessonDraft?.goals||"",parts:lessonDraft?.parts||[]}));
  }catch{}
- window.location.href="./ksp.html";
+ const params=new URLSearchParams({topic:selectedLesson.row.topic,grade:selectedLesson.grade,subject:selectedLesson.subject||"",source:"studio"});
+ window.location.href="./ksp.html?"+params.toString();
 }
 function exportLessonDraft(){
  if(!selectedLesson||!lessonDraft)return;
