@@ -29,6 +29,26 @@
    <div class="research-actions"><button class="btn primary" type="button" id="checkResearch">Проверить исследование</button><button class="btn" type="button" id="exportResearch">Скачать отчёт TXT</button></div>
    <p id="researchResult" class="research-result" aria-live="polite"></p></div>
  </div>
+</section>
+<section class="research-lab" id="medianLab" aria-labelledby="medianTitle">
+ <div class="research-head"><div><h2 id="medianTitle">Исследование №2 · Свойство медианы</h2><p class="mini" id="medianIntro">Исследуем, как медиана делит площадь треугольника.</p></div><span class="pill" id="medianBadge">Геометрия 7 класс</span></div>
+ <div class="research-steps">
+  <div><strong id="medianStep1">1. Гипотеза</strong><p id="medianQuestion">Как связаны площади треугольников ABM и ACM, где M — середина BC?</p>
+   <fieldset class="research-hypothesis"><legend id="medianLegend">Выберите предположение</legend>
+    <label><input type="radio" name="medianPrediction" value="equal"/> <span id="medianEqual">Площади равны</span></label>
+    <label><input type="radio" name="medianPrediction" value="different"/> <span id="medianDifferent">Площади всегда различны</span></label>
+   </fieldset>
+  </div>
+  <div><strong id="medianStep2">2. Эксперимент</strong><p id="medianInstructions">Создайте или выберите треугольник, покажите медиану из A и запишите три наблюдения, меняя форму фигуры.</p>
+   <div class="research-actions"><button class="btn" type="button" id="medianShow">△ Показать медиану на доске</button><button class="btn primary" type="button" id="medianCapture">+ Записать наблюдение</button><button class="btn" type="button" id="medianReset">Сбросить наблюдения</button></div>
+   <p class="mini" id="medianFeedback" aria-live="polite"></p>
+   <div class="research-table-wrap"><table class="research-table"><thead><tr><th id="medianTrial">Опыт</th><th>S(ABM)</th><th>S(ACM)</th><th id="medianDiff">Разница</th></tr></thead><tbody id="medianRecords"></tbody></table></div>
+  </div>
+  <div><strong id="medianStep3">3. Вывод</strong><label for="medianConclusion" id="medianLabel">Объясните, почему площади получаются равными или различными</label><textarea id="medianConclusion" placeholder="Мой вывод..." rows="3"></textarea>
+   <div class="research-actions"><button class="btn primary" type="button" id="medianCheck">Проверить исследование</button><button class="btn" type="button" id="medianExport">Скачать отчёт TXT</button></div>
+   <p class="research-result" id="medianResult" aria-live="polite"></p>
+  </div>
+ </div>
 </section><p class="mini" id="studioHelp">Пока здесь работает переключение этапов и редактирование плана. Автоматическая генерация материалов, QR-подключение учеников и интерактивные задания ещё не подключены.</p></div></section>
 <section id="admin" class="view hidden"><div class="stats"><div class="stat"><strong>1</strong><small data-t="schools">Школа (демо)</small></div><div class="stat"><strong>7</strong><small data-t="allClasses">Классов в каталоге</small></div><div class="stat"><strong>3</strong><small data-t="roles">Роли в проекте</small></div></div><div class="panel"><h2 data-t="adminTitle">Управление платформой</h2><div class="rows" id="adminRows"></div><p class="mini" data-t="adminNotice">Раздел открыт для просмотра макета. Настоящие права администратора появятся только после серверной авторизации.</p></div></section></main></div>
 <script>
@@ -488,12 +508,87 @@ document.getElementById("resetResearch").addEventListener("click",()=>{
 document.getElementById("checkResearch").addEventListener("click",checkResearch);
 document.getElementById("exportResearch").addEventListener("click",exportResearch);
 renderResearch();
+
+let medianSamples=[];
+function medianWords(){
+ return lang==="ru"?{
+ title:"Исследование №2 · Свойство медианы",intro:"Исследуем, как медиана делит площадь треугольника.",badge:"Геометрия · 7 класс",steps:["1. Гипотеза","2. Эксперимент","3. Вывод"],question:"Как связаны площади треугольников ABM и ACM, где M — середина BC?",legend:"Выберите предположение",equal:"Площади равны",different:"Площади всегда различны",instructions:"Создайте или выберите треугольник, покажите медиану из A и запишите три наблюдения, меняя форму фигуры.",show:"△ Показать медиану на доске",capture:"+ Записать наблюдение",reset:"Сбросить наблюдения",trial:"Опыт",diff:"Разница",label:"Объясните, почему площади получаются равными или различными",placeholder:"Мой вывод...",check:"Проверить исследование",export:"Скачать отчёт TXT",noTriangle:"Сначала постройте невырожденный треугольник.",same:"Измените форму треугольника перед новым наблюдением.",full:"Три наблюдения уже записаны.",recorded:"Наблюдение записано.",needPrediction:"Выберите гипотезу.",needSamples:"Нужны три наблюдения разных форм треугольника.",needConclusion:"Запишите собственный вывод.",success:"В трёх опытах медиана разделила треугольник на две равновеликие части. Гипотеза подтверждена. Объяснение: основания BM и MC равны, а высота из A общая.",wrong:"В трёх опытах площади равны. Сравните этот результат со своей гипотезой. Основания BM и MC равны, а высота из A общая.",cleared:"Наблюдения сброшены."
+ }:{
+ title:"№2 зерттеу · Медиананың қасиеті",intro:"Медиананың үшбұрыш ауданын қалай бөлетінін зерттейміз.",badge:"Геометрия · 7-сынып",steps:["1. Болжам","2. Тәжірибе","3. Қорытынды"],question:"M — BC қабырғасының ортасы болса, ABM мен ACM үшбұрыштарының аудандары қалай байланысады?",legend:"Болжамды таңдаңыз",equal:"Аудандары тең",different:"Аудандары әрқашан әртүрлі",instructions:"Үшбұрыш құрып, A төбесінен медиананы көрсетіңіз. Фигураны өзгертіп, үш бақылау жазыңыз.",show:"△ Тақтада медиананы көрсету",capture:"+ Бақылауды жазу",reset:"Бақылауларды тазалау",trial:"Тәжірибе",diff:"Айырмасы",label:"Аудандардың неге тең немесе әртүрлі болатынын түсіндіріңіз",placeholder:"Менің қорытындым...",check:"Зерттеуді тексеру",export:"TXT есебін жүктеу",noTriangle:"Алдымен нөлдік емес ауданды үшбұрыш салыңыз.",same:"Келесі бақылауға дейін үшбұрыш пішінін өзгертіңіз.",full:"Үш бақылау жазылған.",recorded:"Бақылау жазылды.",needPrediction:"Болжамды таңдаңыз.",needSamples:"Пішіні әртүрлі үш бақылау керек.",needConclusion:"Өз қорытындыңызды жазыңыз.",success:"Үш тәжірибеде медиана үшбұрышты аудандары тең екі бөлікке бөлді. Болжам расталды. BM мен MC табандары тең, A төбесінен биіктік ортақ.",wrong:"Үш тәжірибеде аудандар тең. Нәтижені болжамыңызбен салыстырыңыз. BM мен MC табандары тең, биіктігі ортақ.",cleared:"Бақылаулар тазартылды."
+ };
+}
+function medianArea(a,b,c){
+ return Math.abs((b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x))/(2*GRAPH_SCALE*GRAPH_SCALE);
+}
+function medianObservation(s){
+ const [A,B,C]=s.points,M={x:(B.x+C.x)/2,y:(B.y+C.y)/2};
+ const first=medianArea(A,B,M),second=medianArea(A,M,C);
+ return {first,second,points:s.points.map(p=>[p.x,p.y])};
+}
+function renderMedianLab(){
+ const d=medianWords();
+ for(const [id,val] of [["medianTitle",d.title],["medianIntro",d.intro],["medianBadge",d.badge],["medianStep1",d.steps[0]],["medianStep2",d.steps[1]],["medianStep3",d.steps[2]],["medianQuestion",d.question],["medianLegend",d.legend],["medianEqual",d.equal],["medianDifferent",d.different],["medianInstructions",d.instructions],["medianShow",d.show],["medianCapture",d.capture],["medianReset",d.reset],["medianTrial",d.trial],["medianDiff",d.diff],["medianLabel",d.label],["medianCheck",d.check],["medianExport",d.export]])document.getElementById(id).textContent=val;
+ document.getElementById("medianConclusion").placeholder=d.placeholder;
+ const tbody=document.getElementById("medianRecords");tbody.replaceChildren();
+ for(let i=0;i<medianSamples.length;i++){
+  const s=medianSamples[i],tr=document.createElement("tr");
+  for(const v of [String(i+1),s.first.toFixed(2),s.second.toFixed(2),Math.abs(s.first-s.second).toFixed(2)]){
+   const td=document.createElement("td");td.textContent=v;tr.append(td)
+  }
+  tbody.append(tr);
+ }
+}
+function showMedianForResearch(){
+ let s=selectedResearchTriangle();
+ if(!s){createResearchExample();s=selectedResearchTriangle()}
+ if(!s)return;
+ selectedTriangle=s;document.getElementById("constructVertex").value="A";
+ constructOptions.median=true;refreshConstructControls();updateTriangleStats();paintBoard();
+ board.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function captureMedianObservation(){
+ const d=medianWords(),msg=document.getElementById("medianFeedback"),shape=selectedResearchTriangle();
+ if(!shape){msg.textContent=d.noTriangle;return}
+ const sample=medianObservation(shape);
+ if(sample.first+sample.second<0.02){msg.textContent=d.noTriangle;return}
+ if(medianSamples.length>=3){msg.textContent=d.full;return}
+ if(medianSamples.length){
+  const previous=medianSamples[medianSamples.length-1];
+  const movement=Math.max(...sample.points.map((p,i)=>Math.hypot(p[0]-previous.points[i][0],p[1]-previous.points[i][1])));
+  if(movement<18){msg.textContent=d.same;return}
+ }
+ medianSamples.push(sample);msg.textContent=d.recorded+" "+medianSamples.length+"/3";
+ document.getElementById("medianResult").textContent="";renderMedianLab();
+}
+function checkMedianResearch(){
+ const d=medianWords(),out=document.getElementById("medianResult"),choice=document.querySelector('input[name="medianPrediction"]:checked')?.value;
+ if(!choice){out.textContent=d.needPrediction;return}
+ if(medianSamples.length<3){out.textContent=d.needSamples;return}
+ if(!document.getElementById("medianConclusion").value.trim()){out.textContent=d.needConclusion;return}
+ out.textContent=choice==="equal"?d.success:d.wrong;
+}
+function exportMedianResearch(){
+ const d=medianWords(),choice=document.querySelector('input[name="medianPrediction"]:checked')?.value||"—";
+ const lines=["M-academy",d.title,d.question,d.legend+": "+choice,""];
+ medianSamples.forEach((s,i)=>lines.push((i+1)+". S(ABM)="+s.first.toFixed(4)+"; S(ACM)="+s.second.toFixed(4)));
+ lines.push("",d.label,document.getElementById("medianConclusion").value);
+ const blob=new Blob(["\uFEFF"+lines.join("\n")],{type:"text/plain;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="m-academy-median-research.txt";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+document.getElementById("medianShow").addEventListener("click",showMedianForResearch);
+document.getElementById("medianCapture").addEventListener("click",captureMedianObservation);
+document.getElementById("medianCheck").addEventListener("click",checkMedianResearch);
+document.getElementById("medianExport").addEventListener("click",exportMedianResearch);
+document.getElementById("medianReset").addEventListener("click",()=>{
+ medianSamples=[];document.getElementById("medianResult").textContent="";document.getElementById("medianFeedback").textContent=medianWords().cleared;renderMedianLab()
+});
+renderMedianLab();
 function render(){document.documentElement.lang=lang;document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));document.getElementById("langBtn").textContent=lang==="ru"?"ҚАЗ":"РУС";const groups=[["6Е","math"],["7Е","algebra"],["9Ж","algebra"],["10Д","algebra"]];document.getElementById("classes").innerHTML=groups.map(g=>'<article class="card"><strong>'+g[0]+'</strong><span>'+ (g[1]==="math"?t("math"):t("algebra")+" / "+t("geometry"))+'</span><small>DEMO · '+t("curriculum").slice(4)+'</small></article>').join("");
 document.getElementById("ktpClass").innerHTML=groups.map(g=>'<option>'+g[0]+'</option>').join("");document.getElementById("ktpClass").value=window._ktpGrade||"9Ж";
 renderCurriculum();document.querySelector('[data-t="ktpCount"]').previousElementSibling.textContent=Object.keys(storedPlans()).length;
 document.getElementById("lessonRows").innerHTML=t("topics").slice(0,3).map((s,i)=>'<div class="item"><div><strong>'+s+'</strong><small>9Ж · '+t("algebra")+'</small></div><span class="pill soon">'+t("planned")+'</span></div>').join("");
 document.getElementById("trainerRows").innerHTML=t("topics").slice(0,3).map(s=>'<div class="item"><div><strong>'+s+'</strong><small>'+t("trainerTitle")+'</small></div><span class="pill soon">'+t("soon")+'</span></div>').join("");
-document.getElementById("adminRows").innerHTML=t("adminTools").map(s=>'<div class="item"><strong>'+s+'</strong><span class="pill soon">'+t("soon")+'</span></div>').join("");renderStage();translateBoard();renderResearch();if(selectedLesson){loadLessonDraft();updateStudioLesson();refreshStageEditor()}switchView(view)}
+document.getElementById("adminRows").innerHTML=t("adminTools").map(s=>'<div class="item"><strong>'+s+'</strong><span class="pill soon">'+t("soon")+'</span></div>').join("");renderStage();translateBoard();renderResearch();renderMedianLab();if(selectedLesson){loadLessonDraft();updateStudioLesson();refreshStageEditor()}switchView(view)}
 function renderStage(){document.getElementById("stages").innerHTML=t("stages").map((s,i)=>'<div style="padding:11px 13px;border-radius:10px;background:'+(i===stage?"#FFFFFF35":"#FFFFFF11")+';border:1px solid #FFFFFF24;font-size:13px">'+(i===stage?"▶ ":"")+(i+1)+'. '+s+'</div>').join("")}
 document.querySelectorAll(".navbtn").forEach(b=>b.addEventListener("click",()=>switchView(b.dataset.view)));document.getElementById("ktpClass").addEventListener("change",()=>{window._ktpGrade=document.getElementById("ktpClass").value;renderCurriculum()});
 document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>switchView(b.dataset.jump)));
