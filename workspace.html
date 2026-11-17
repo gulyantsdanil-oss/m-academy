@@ -64,6 +64,7 @@ if(incoming.get("source")==="catalog"&&incoming.get("topic")){
  selectedLesson={grade:grade+(lang==="ru"?" класс":" сынып"),subject,subjectLabel:(labels[subject]||labels.math)[lang==="ru"?0:1],year:"2026–2027",index:0,row};
  try{sessionStorage.setItem("m-academy-current-lesson",JSON.stringify(selectedLesson))}catch{}
 }
+if(incoming.get("source")==="catalog"&&incoming.get("topic"))view="studio";
 const t=k=>dict[lang][k]||k;const mapping={teacher:0,curriculum:1,lessons:2,trainer:3,studio:4,admin:5};
 function switchView(v){if(!(v in mapping))return;view=v;if(v==="studio"&&selectedLesson&&!lessonDraft){loadLessonDraft();updateStudioLesson()}document.querySelectorAll(".view").forEach(el=>el.classList.toggle("hidden",el.id!==v));document.querySelectorAll(".navbtn").forEach(el=>el.classList.toggle("active",el.dataset.view===v));document.getElementById("heading").textContent=t("views")[mapping[v]];document.getElementById("subhead").textContent=lang==="ru"?"Демонстрационная версия · без учётных записей":"Демонстрациялық нұсқа · тіркелгілер жоқ";location.hash=v}
 const LOCAL_KTP_KEY="m-academy-ktp-v1";
@@ -602,5 +603,8 @@ function renderStage(){document.getElementById("stages").innerHTML=t("stages").m
 document.querySelectorAll(".navbtn").forEach(b=>b.addEventListener("click",()=>switchView(b.dataset.view)));document.getElementById("ktpClass").addEventListener("change",()=>{window._ktpGrade=document.getElementById("ktpClass").value;renderCurriculum()});
 document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>switchView(b.dataset.jump)));
 document.getElementById("langBtn").addEventListener("click",()=>{lang=lang==="ru"?"kk":"ru";try{localStorage.setItem("m-academy-lang",lang)}catch{}render()});
-document.getElementById("advance").addEventListener("click",()=>{collectStageEditor();stage=(stage+1)%t("stages").length;renderStage();refreshStageEditor()});document.getElementById("restart").addEventListener("click",()=>{collectStageEditor();stage=0;renderStage();refreshStageEditor()});document.getElementById("saveDraft").addEventListener("click",saveLessonDraft);document.getElementById("exportDraft").addEventListener("click",exportLessonDraft);if(location.hash&&mapping[location.hash.slice(1)]!==undefined)view=location.hash.slice(1);switchView(view);render();
+document.getElementById("advance").addEventListener("click",()=>{collectStageEditor();stage=(stage+1)%t("stages").length;renderStage();refreshStageEditor()});document.getElementById("restart").addEventListener("click",()=>{collectStageEditor();stage=0;renderStage();refreshStageEditor()});document.getElementById("saveDraft").addEventListener("click",saveLessonDraft);document.getElementById("exportDraft").addEventListener("click",exportLessonDraft);if(incoming.get("source")==="catalog"&&incoming.get("topic"))view="studio";
+else if(location.hash&&mapping[location.hash.slice(1)]!==undefined)view=location.hash.slice(1);
+render();
+if(view==="studio"){requestAnimationFrame(()=>{switchView("studio");const node=document.getElementById("studioLessonTitle");if(node&&selectedLesson)node.scrollIntoView({block:"start"})})}
 </script></body></html>
