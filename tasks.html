@@ -206,5 +206,5 @@ $("bundleDownload").addEventListener("click",()=>{
  $("bundleStatus").textContent=lang==="ru"?"ZIP сформирован. Лист ученика не содержит решений.":"ZIP дайын. Оқушы парағында жауаптар жоқ.";
  }catch(e){$("bundleStatus").textContent=String(e.message||e)}
 });
-generate();translate();bundleStatus();
+generate();translate();bundleStatus();if(params.get("bundle")==="1")requestAnimationFrame(()=>document.getElementById("bundle").scrollIntoView({block:"start"}));
 </script></body></html>
