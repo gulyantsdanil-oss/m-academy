@@ -23,6 +23,37 @@ create table if not exists public.memberships (
  primary key(school_id,user_id)
 );
 
+create table if not exists public.classes (
+ id uuid primary key default gen_random_uuid(),
+ school_id uuid not null references public.schools(id) on delete cascade,
+ label text not null check(length(trim(label)) between 1 and 40),
+ academic_year text not null check(academic_year ~ '^[0-9]{4}-[0-9]{4}$'),
+ created_at timestamptz not null default now(),
+ unique(id,school_id),
+ unique(school_id,label,academic_year)
+);
+
+create table if not exists public.class_teachers (
+ school_id uuid not null,
+ class_id uuid not null,
+ teacher_id uuid not null,
+ subject text not null check(length(trim(subject)) between 2 and 100),
+ primary key(class_id,teacher_id,subject),
+ foreign key(class_id,school_id) references public.classes(id,school_id) on delete cascade,
+ foreign key(school_id,teacher_id) references public.memberships(school_id,user_id) on delete cascade
+);
+create index if not exists ct_teacher_idx on public.class_teachers(teacher_id,school_id);
+
+create table if not exists public.class_students (
+ school_id uuid not null,
+ class_id uuid not null,
+ student_id uuid not null,
+ primary key(class_id,student_id),
+ foreign key(class_id,school_id) references public.classes(id,school_id) on delete cascade,
+ foreign key(school_id,student_id) references public.memberships(school_id,user_id) on delete cascade
+);
+create index if not exists cs_student_idx on public.class_students(student_id,school_id);
+
 -- SECURITY DEFINER helpers run as migration owner and avoid recursive membership RLS.
 -- Restrict EXECUTE to authenticated; no dynamic SQL or user-selectable privilege input.
 create or replace function app_private.has_role(_school uuid, _roles text[])
@@ -71,36 +102,6 @@ grant execute on function app_private.has_role(uuid,text[]) to authenticated;
 grant execute on function app_private.is_teacher_of(uuid) to authenticated;
 grant execute on function app_private.is_student_of(uuid) to authenticated;
 
-create table if not exists public.classes (
- id uuid primary key default gen_random_uuid(),
- school_id uuid not null references public.schools(id) on delete cascade,
- label text not null check(length(trim(label)) between 1 and 40),
- academic_year text not null check(academic_year ~ '^[0-9]{4}-[0-9]{4}$'),
- created_at timestamptz not null default now(),
- unique(id,school_id),
- unique(school_id,label,academic_year)
-);
-
-create table if not exists public.class_teachers (
- school_id uuid not null,
- class_id uuid not null,
- teacher_id uuid not null,
- subject text not null check(length(trim(subject)) between 2 and 100),
- primary key(class_id,teacher_id,subject),
- foreign key(class_id,school_id) references public.classes(id,school_id) on delete cascade,
- foreign key(school_id,teacher_id) references public.memberships(school_id,user_id) on delete cascade
-);
-create index if not exists ct_teacher_idx on public.class_teachers(teacher_id,school_id);
-
-create table if not exists public.class_students (
- school_id uuid not null,
- class_id uuid not null,
- student_id uuid not null,
- primary key(class_id,student_id),
- foreign key(class_id,school_id) references public.classes(id,school_id) on delete cascade,
- foreign key(school_id,student_id) references public.memberships(school_id,user_id) on delete cascade
-);
-create index if not exists cs_student_idx on public.class_students(student_id,school_id);
 
 create table if not exists public.curriculum_plans (
  id uuid primary key default gen_random_uuid(),
