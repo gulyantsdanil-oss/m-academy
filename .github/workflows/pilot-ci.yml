@@ -1,0 +1,39 @@
+name: M-academy pilot — checks
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/pilot-ci.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/pilot-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pilot-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend/pilot-app
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Static SQL and security contracts
+        run: npm test
+      - name: TypeScript
+        run: npm run lint
+      - name: Build Next.js pilot
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: npm run build
