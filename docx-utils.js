@@ -37,6 +37,7 @@
  function docx(blocks,{landscape=false}={}){
   let body="";
   for(const block of blocks){
+   if(block.type==="pagebreak"){body+='<w:p><w:r><w:br w:type="page"/></w:r></w:p>';continue}
    if(block.type==="table")body+=tbl(block.rows,block.widths,{headerRow:block.headerRow!==false});
    else body+=p(block.text||"",{center:block.type==="title",bold:block.type==="title"||block.type==="heading"||block.bold,size:block.type==="title"?30:block.type==="heading"?25:22,before:block.type==="heading"?180:0});
   }
