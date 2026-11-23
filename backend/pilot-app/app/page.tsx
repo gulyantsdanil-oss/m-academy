@@ -1,5 +1,5 @@
 'use client';
-import {useCallback,useEffect,useMemo,useState} from 'react';
+import {useCallback,useEffect,useMemo,useState,type FormEvent} from 'react';
 import type {User} from '@supabase/supabase-js';
 import {getSupabase} from '@/lib/supabase';
 import type {Membership,School,ClassRoom,TeacherAssignment,StudentEnrollment,Assignment,Ksp} from '@/lib/types';
@@ -96,7 +96,7 @@ export default function PilotHome(){
   return()=>{alive=false};
  },[active,user,refreshToken]);
 
- async function sendLogin(e:React.FormEvent){
+ async function sendLogin(e:FormEvent){
   e.preventDefault();if(!client)return;
   const clean=email.trim().toLowerCase();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)){setError('Введите корректный email.');return}
@@ -112,7 +112,7 @@ export default function PilotHome(){
   if(!client)return;
   await client.auth.signOut();setUser(null);setReadiness('logged_out');setActiveSchoolId('');setMemberships([]);setMessage('');
  }
- async function addClass(e:React.FormEvent){
+ async function addClass(e:FormEvent){
   e.preventDefault();if(!client||!active||active.membership.role!=='admin')return;
   if(!/^\d{4}-\d{4}$/.test(academicYear)||name.trim().length<1||name.trim().length>40){setError('Проверьте класс и учебный год.');return}
   setCreating(true);setError('');
