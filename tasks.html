@@ -72,7 +72,7 @@ function roots(level,r){
 }
 function trig(level,r){
  const deg=[0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330][integer(r,0,15)];
- const val=Math.round(Math.sin(deg*Math.PI/180)*1e10)/1e10;
+ const val=Math.round(Math.sin(deg*Math.PI/180)*1e6)/1e6;
  if(level==="A")return{q:{ru:"Найдите sin "+deg+"° (ответ числом, допустима десятичная дробь).",kk:"sin "+deg+"° мәнін табыңыз (жауабы сан түрінде)."},ans:val,solution:"sin "+deg+"° = "+fmt(val)};
  if(level==="B"){
   const coef=integer(r,1,6),target=[-1,-0.5,0,0.5,1][integer(r,0,4)],rhs=coef*target;
