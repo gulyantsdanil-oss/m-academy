@@ -102,7 +102,7 @@ export default function PilotHome(){
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)){setError('Введите корректный email.');return}
   setError('');setSending(true);
   const {error:loginError}=await client.auth.signInWithOtp({
-   email:clean,options:{emailRedirectTo:window.location.origin}
+   email:clean,options:{emailRedirectTo:window.location.origin,shouldCreateUser:false}
   });
   setSending(false);
   if(loginError)setError(loginError.message);
