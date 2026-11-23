@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useMemo,useState,type ChangeEvent,type FormEvent} from 'react';
 import {getSupabase} from '@/lib/supabase';
 import type {ClassRoom,TeacherAssignment} from '@/lib/types';
+import {MaterialForm} from '@/components/MaterialForm';
 
 type Kind='ksp'|'ktp';
 type Material={id:string;school_id:string;class_id:string;teacher_id:string;revision:number;updated_at:string;content:Record<string,unknown>;topic?:string;subject?:string};
@@ -55,6 +56,8 @@ export function TeacherMaterials({
  const [message,setMessage]=useState('');
  const [imports,setImports]=useState<BackupRow[]>([]);
  const [selectedImport,setSelectedImport]=useState('0');
+ const [showJson,setShowJson]=useState(false);
+ const visualValue=useMemo(()=>{try{const v:unknown=JSON.parse(editor);return validMaterial(kind,v)?v:null}catch{return null}},[editor,kind]);
 
  const fetchDocuments=useCallback(async()=>{
   if(!api||!currentClass){setDocs([]);return}
@@ -162,9 +165,11 @@ export function TeacherMaterials({
    <form onSubmit={e=>void save(e)}>
     <label htmlFor="matTitle">{kind==='ksp'?'Тема КСП':'Предмет КТП'}</label>
     <input id="matTitle" required maxLength={300} value={title} onChange={e=>setTitle(e.target.value)}/>
-    <label htmlFor="matBody">Структура документа (JSON)</label>
+    {visualValue?<MaterialForm kind={kind} value={visualValue} onChange={next=>setEditor(stringify(next))}/>:<p className="warning">Невозможно показать визуальную форму: структура JSON некорректна. Исправьте её ниже.</p>}
+    <div className="actions"><button type="button" className="btn" onClick={()=>setShowJson(v=>!v)}>{showJson||!visualValue?'Скрыть JSON':'Показать структуру JSON'}</button></div>
+    {(showJson||!visualValue)&&<><label htmlFor="matBody">Структура документа (JSON)</label>
     <textarea id="matBody" rows={18} className="editor-area" value={editor}
-      onChange={e=>setEditor(e.target.value)} spellCheck={false} aria-describedby="matHelp"/>
+      onChange={e=>setEditor(e.target.value)} spellCheck={false} aria-describedby="matHelp"/></>}
     <p className="muted" id="matHelp">Не включайте персональные сведения реальных учащихся в тестовую систему. Сохранённый документ доступен только назначенному учителю.</p>
     <div className="actions">
      <button type="submit" className="btn primary" disabled={busy}>{busy?'Сохранение…':selected?'Сохранить новую редакцию':'Создать на сервере'}</button>
