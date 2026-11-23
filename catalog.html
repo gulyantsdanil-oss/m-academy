@@ -5,7 +5,13 @@
  (g===7&&/линейная функция|сызықтық функция/.test(s))||
  (g===8&&/квадратные корни|квадратные уравнения|квадрат түбір|квадрат теңдеу/.test(s))||
  (g===9&&/арифметическая прогрессия|арифметикалық прогрессия/.test(s))||
- (g===10&&/тригонометрические уравнения|тригонометриялық теңдеу/.test(s))
+ (g===10&&/тригонометрические уравнения|тригонометриялық теңдеу|производная функции|туынды/.test(s))||
+ (g===11&&/логарифм числа|логарифм/.test(s))||
+ (g===5&&/обыкновенные дроби|жай бөлшектер/.test(s))||
+ (g===6&&/пропорция/.test(s))||
+ (g===7&&/свойства степеней|дәрежелердің қасиеттері/.test(s))||
+ (g===8&&/теорема пифагора|пифагор теоремасы/.test(s))||
+ (g===9&&/геометрическая прогрессия|геометриялық прогрессия/.test(s))
 }
 function render(){const l=ui(),g=byId("grade").value,s=byId("subject").value,p=byId("profile").value,q=byId("search").value.trim().toLocaleLowerCase();const chosen=courses.filter(c=>(!g||String(c.grade)===g)&&(!s||c.subject===s)&&(!p||c.profile===p));const container=byId("cards");container.replaceChildren();let hits=0;for(const course of chosen){const topics=course.topics.filter(t=>!q||t.toLocaleLowerCase().includes(q));if(q&&!topics.length)continue;hits+=topics.length;const card=document.createElement("article");card.className="course";const h=document.createElement("h2");h.textContent=course.grade+" "+(lang==="ru"?course.subjectRu:course.subjectKk);const meta=document.createElement("div");meta.className="meta";meta.textContent=course.profile?course.profile==="emn"?l.emn:l.ogn:l.common;card.append(h,meta);const block=document.createElement("div");block.className="topics";for(const [i,topic] of topics.entries()){const item=document.createElement("div");item.className="topic";const name=document.createElement("span");name.textContent=topic;const button=document.createElement("button");button.type="button";button.textContent=l.prepare;button.title=lang==="ru"?"Создать черновик урока по выбранной теме":"Тақырып бойынша сабақ жобасын ашу";button.addEventListener("click",()=>prepareLesson(course,topic));const quick=document.createElement("div");quick.className="quick";quick.append(button);
 const plan=document.createElement("button");plan.type="button";plan.className="alt";plan.textContent=lang==="ru"?"КСП":"ҚМЖ";plan.title=lang==="ru"?"Открыть редактор КСП с выбранной темой":"Тақырып бойынша ҚМЖ редакторын ашу";plan.addEventListener("click",()=>{
