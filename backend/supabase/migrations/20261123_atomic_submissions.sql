@@ -42,7 +42,7 @@ begin
   select 1 from pg_catalog.jsonb_each_text(p_answers) as a(key,value)
   left join public.assignment_questions q on q.id::text=a.key
    and q.assignment_id=p_assignment
-  where q.id is null or pg_catalog.length(a.value)>1000 or pg_catalog.length(pg_catalog.btrim(a.value))=0
+  where q.id is null or a.value is null or pg_catalog.length(a.value)>1000 or pg_catalog.length(pg_catalog.btrim(a.value))=0
  ) then raise exception 'Unknown question or invalid answer'; end if;
 
  insert into public.submissions(school_id,assignment_id,student_id)
