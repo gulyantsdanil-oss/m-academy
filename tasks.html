@@ -189,7 +189,7 @@ $("sendKsp").addEventListener("click",()=>{
 });
 $("print").addEventListener("click",()=>window.print());
 $("export").addEventListener("click",()=>{
- const lines=["M-academy",T("topics")[["progression","quadratic","rational","percent","linear","roots","trig"].indexOf($("subject").value)],T("variantWord")+": "+$("variant").value,""];
+ const lines=["M-academy",T("topics")[["progression","quadratic","rational","percent","linear","roots","trig","fractions","proportion","powers","pythagoras","geometric","derivative","logarithm"].indexOf($("subject").value)],T("variantWord")+": "+$("variant").value,""];
  items.forEach((q,i)=>lines.push((i+1)+". ["+q.level+"] "+q.q[lang],...(mode==="teacher"?[T("answer")+": "+fmt(q.ans),T("solution")+": "+q.solution]:[]),""));
  const blob=new Blob(["\uFEFF"+lines.join("\n")],{type:"text/plain;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");
  a.href=url;a.download="m-academy-tasks-"+$("subject").value+"-"+$("variant").value+"-"+mode+".txt";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
