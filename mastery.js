@@ -13,7 +13,7 @@ function save(id,patch){if(!validId(id))throw Error("Invalid lesson id");const a
 function recordSelf(id,confidence,now=Date.now()){
  confidence=Math.floor(bounded(confidence,0,3));
  const prev=get(id),days=confidence===3?7:confidence===2?3:confidence===1?1:0;
- return save(id,{confidence,reviewAt:now+days*DAY,updatedAt:new Date(now).toISOString(),evidence:prev.evidence==="auto"?"auto":"self"})
+ return save(id,{confidence,reviewAt:now+days*DAY,updatedAt:new Date(now).toISOString(),evidence:"self"})
 }
 function recordQuiz(id,correct,total,now=Date.now()){
  if(!Number.isInteger(correct)||!Number.isInteger(total)||total<1||correct<0||correct>total)throw Error("Invalid quiz result");
