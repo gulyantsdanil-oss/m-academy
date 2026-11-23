@@ -298,79 +298,103 @@ create policy assignments_student_select on public.assignments for select to aut
  published and app_private.is_student_of(class_id)
 );
 
+-- Correlated RLS predicates explicitly qualify OUTER row columns.
+-- Unqualified references inside subqueries can resolve to the wrong table or fail 42702.
 drop policy if exists questions_teacher_all on public.assignment_questions;
 create policy questions_teacher_all on public.assignment_questions for all to authenticated
- using(exists(select 1 from public.assignments a where a.id=assignment_id
-   and a.school_id=school_id and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id)))
- with check(exists(select 1 from public.assignments a where a.id=assignment_id
-   and a.school_id=school_id and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id)));
+ using(exists(select 1 from public.assignments a
+  where a.id=assignment_questions.assignment_id
+  and a.school_id=assignment_questions.school_id
+  and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id)))
+ with check(exists(select 1 from public.assignments a
+  where a.id=assignment_questions.assignment_id
+  and a.school_id=assignment_questions.school_id
+  and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id)));
 drop policy if exists questions_student_read on public.assignment_questions;
 create policy questions_student_read on public.assignment_questions for select to authenticated
- using(exists(select 1 from public.assignments a where a.id=assignment_id
-   and a.school_id=school_id and a.published and app_private.is_student_of(a.class_id)));
+ using(exists(select 1 from public.assignments a
+  where a.id=assignment_questions.assignment_id
+  and a.school_id=assignment_questions.school_id
+  and a.published and app_private.is_student_of(a.class_id)));
 
 drop policy if exists keys_teacher_all on public.assignment_keys;
 create policy keys_teacher_all on public.assignment_keys for all to authenticated
- using(exists(select 1 from public.assignment_questions q join public.assignments a on a.id=q.assignment_id
-   where q.id=question_id and q.school_id=school_id and a.teacher_id=(select auth.uid())
-     and app_private.is_teacher_of(a.class_id)))
- with check(exists(select 1 from public.assignment_questions q join public.assignments a on a.id=q.assignment_id
-   where q.id=question_id and q.school_id=school_id and a.teacher_id=(select auth.uid())
-     and app_private.is_teacher_of(a.class_id)));
+ using(exists(select 1 from public.assignment_questions q
+  join public.assignments a on a.id=q.assignment_id
+  where q.id=assignment_keys.question_id and q.school_id=assignment_keys.school_id
+  and a.school_id=assignment_keys.school_id
+  and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id)))
+ with check(exists(select 1 from public.assignment_questions q
+  join public.assignments a on a.id=q.assignment_id
+  where q.id=assignment_keys.question_id and q.school_id=assignment_keys.school_id
+  and a.school_id=assignment_keys.school_id
+  and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id)));
 
 drop policy if exists submission_student_insert on public.submissions;
 create policy submission_student_insert on public.submissions for insert to authenticated with check(
- student_id=(select auth.uid()) and exists(
-  select 1 from public.assignments a where a.id=assignment_id and a.school_id=school_id
+ submissions.student_id=(select auth.uid()) and exists(
+  select 1 from public.assignments a
+  where a.id=submissions.assignment_id and a.school_id=submissions.school_id
    and a.published and app_private.is_student_of(a.class_id)
  )
 );
 drop policy if exists submission_student_select on public.submissions;
 create policy submission_student_select on public.submissions for select to authenticated using(
- student_id=(select auth.uid()) and app_private.has_role(school_id,array['student'])
+ submissions.student_id=(select auth.uid()) and app_private.has_role(submissions.school_id,array['student'])
 );
 drop policy if exists submission_teacher_select on public.submissions;
 create policy submission_teacher_select on public.submissions for select to authenticated using(
- exists(select 1 from public.assignments a where a.id=assignment_id
-  and a.school_id=school_id and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id))
+ exists(select 1 from public.assignments a
+  where a.id=submissions.assignment_id and a.school_id=submissions.school_id
+  and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id))
 );
 
 drop policy if exists answers_student_insert on public.submission_answers;
 create policy answers_student_insert on public.submission_answers for insert to authenticated with check(
- exists(select 1 from public.submissions s join public.assignments a on a.id=s.assignment_id
- where s.id=submission_id and s.school_id=school_id and s.student_id=(select auth.uid())
- and a.published and app_private.is_student_of(a.class_id)
- and exists(select 1 from public.assignment_questions q
-   where q.id=question_id and q.assignment_id=a.id and q.school_id=school_id))
+ exists(select 1 from public.submissions s
+  join public.assignments a on a.id=s.assignment_id and a.school_id=s.school_id
+  where s.id=submission_answers.submission_id and s.school_id=submission_answers.school_id
+   and s.student_id=(select auth.uid()) and a.published
+   and app_private.is_student_of(a.class_id)
+   and exists(select 1 from public.assignment_questions q
+    where q.id=submission_answers.question_id and q.assignment_id=a.id
+     and q.school_id=submission_answers.school_id))
 );
 drop policy if exists answers_student_select on public.submission_answers;
 create policy answers_student_select on public.submission_answers for select to authenticated using(
- exists(select 1 from public.submissions s where s.id=submission_id
- and s.school_id=school_id and s.student_id=(select auth.uid())
- and app_private.has_role(school_id,array['student']))
+ exists(select 1 from public.submissions s
+  where s.id=submission_answers.submission_id and s.school_id=submission_answers.school_id
+   and s.student_id=(select auth.uid())
+   and app_private.has_role(submission_answers.school_id,array['student']))
 );
 drop policy if exists answers_teacher_select on public.submission_answers;
 create policy answers_teacher_select on public.submission_answers for select to authenticated using(
- exists(select 1 from public.submissions s join public.assignments a on a.id=s.assignment_id
- where s.id=submission_id and s.school_id=school_id and
- a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id))
+ exists(select 1 from public.submissions s
+  join public.assignments a on a.id=s.assignment_id and a.school_id=s.school_id
+  where s.id=submission_answers.submission_id and s.school_id=submission_answers.school_id
+   and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id))
 );
 
 drop policy if exists grades_teacher_all on public.submission_grades;
 create policy grades_teacher_all on public.submission_grades for all to authenticated using(
- graded_by=(select auth.uid()) and exists(select 1 from public.submissions s
- join public.assignments a on a.id=s.assignment_id where s.id=submission_id
- and s.school_id=school_id and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id))
+ submission_grades.graded_by=(select auth.uid()) and exists(
+  select 1 from public.submissions s
+  join public.assignments a on a.id=s.assignment_id and a.school_id=s.school_id
+  where s.id=submission_grades.submission_id and s.school_id=submission_grades.school_id
+   and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id))
 ) with check(
- graded_by=(select auth.uid()) and exists(select 1 from public.submissions s
- join public.assignments a on a.id=s.assignment_id where s.id=submission_id
- and s.school_id=school_id and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id))
+ submission_grades.graded_by=(select auth.uid()) and exists(
+  select 1 from public.submissions s
+  join public.assignments a on a.id=s.assignment_id and a.school_id=s.school_id
+  where s.id=submission_grades.submission_id and s.school_id=submission_grades.school_id
+   and a.teacher_id=(select auth.uid()) and app_private.is_teacher_of(a.class_id))
 );
 drop policy if exists grades_student_select on public.submission_grades;
 create policy grades_student_select on public.submission_grades for select to authenticated using(
- exists(select 1 from public.submissions s where s.id=submission_id
- and s.school_id=school_id and s.student_id=(select auth.uid())
- and app_private.has_role(school_id,array['student']))
+ exists(select 1 from public.submissions s
+  where s.id=submission_grades.submission_id and s.school_id=submission_grades.school_id
+   and s.student_id=(select auth.uid())
+   and app_private.has_role(submission_grades.school_id,array['student']))
 );
 
 -- Defense in depth: roles also need SQL table privileges; authenticated cannot touch memberships.
