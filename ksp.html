@@ -27,6 +27,7 @@
 const $=id=>document.getElementById(id);
 let lang="ru";try{lang=localStorage.getItem("m-academy-lang")==="kk"?"kk":"ru"}catch{}
 const sourceFields=["school","teacher","section","date","grade","present","absent","topic","learning","objectives","homework","adaptation","teacherAnswerKey"];
+const AUTO_DRAFT_KEY="m-academy-ksp-autodraft-v1";let autoSaveTimer=null,autoSaveEnabled=false;
 const phaseDefaultsRu=["Организационный момент","Актуализация знаний","Изучение нового материала","Индивидуальная работа","Парная работа","Групповая работа","Рефлексия"];
 const phaseDefaultsKk=["Ұйымдастыру кезеңі","Өткенді қайталау","Жаңа материалды меңгеру","Жеке жұмыс","Жұптық жұмыс","Топтық жұмыс","Рефлексия"];
 let phases=[];
@@ -183,14 +184,47 @@ function initialize(){
  // Keep statutory learning objectives sourced from KTP only; Studio draft goals are editable lesson objectives.
  if(lesson?.grade){$("grade").value=lesson.grade}
  const key=planStorageKey();
+ let previous=null;
  try{
-  const previous=JSON.parse(localStorage.getItem("m-academy-ksp-v1")||"{}")[key];
+  previous=JSON.parse(localStorage.getItem("m-academy-ksp-v1")||"{}")[key];
   if(previous&&previous.fields){for(const [id,v] of Object.entries(previous.fields)){if(sourceFields.includes(id))$(id).value=v}phases=previous.phases||phases}
  }catch{}
+ restoreAutoDraft(previous);
  fillGuidance();
  renderEditor();translate();renderDocument();loadIncomingTasks();
+ autoSaveEnabled=true;
 }
 function planStorageKey(){return[ $("grade").value.trim(),$("topic").value.trim(),getLesson()?.subject||""].join("::")}
+function autoDraftKey(){return planStorageKey()}
+function readAutoDraft(){
+ try{const all=JSON.parse(localStorage.getItem(AUTO_DRAFT_KEY)||"{}");return all&&typeof all==="object"&&!Array.isArray(all)?all:{}}catch{return {}}
+}
+function saveAutoDraft(){
+ if(!autoSaveEnabled)return;
+ const key=autoDraftKey(),all=readAutoDraft();
+ if(!$("topic").value.trim()&&!$("section").value.trim()&&!$("teacher").value.trim())return;
+ all[key]={fields:fields(),phases:phases.map(x=>({...x})),updated:new Date().toISOString()};
+ try{
+  const keys=Object.keys(all);
+  if(keys.length>60)keys.sort((a,b)=>String(all[a]?.updated||"").localeCompare(String(all[b]?.updated||""))).slice(0,keys.length-60).forEach(k=>delete all[k]);
+  localStorage.setItem(AUTO_DRAFT_KEY,JSON.stringify(all));
+ }catch{}
+}
+function scheduleAutoDraft(){
+ if(!autoSaveEnabled)return;
+ if(autoSaveTimer)clearTimeout(autoSaveTimer);
+ autoSaveTimer=setTimeout(saveAutoDraft,700);
+}
+function restoreAutoDraft(lastSaved){
+ const draft=readAutoDraft()[autoDraftKey()];
+ if(!draft||!draft.fields||!Array.isArray(draft.phases))return;
+ if(lastSaved?.modified&&String(draft.updated||"")<=String(lastSaved.modified))return;
+ const prompt=lang==="ru"?"Обнаружен несохранённый черновик КСП. Восстановить последние изменения?":"ҚМЖ-ның сақталмаған жобасы табылды. Соңғы өзгерістерді қалпына келтіресіз бе?";
+ if(!confirm(prompt))return;
+ for(const [id,val] of Object.entries(draft.fields)){if(sourceFields.includes(id))$(id).value=String(val??"")}
+ phases=draft.phases.filter(x=>x&&typeof x==="object").slice(0,40).map(x=>({title:String(x.title||""),minutes:Number(x.minutes)||0,teacher:String(x.teacher||""),student:String(x.student||""),evaluation:String(x.evaluation||""),resources:String(x.resources||"")}));
+}
+
 function renderEditor(){
  const parent=$("phases");parent.replaceChildren();
  phases.forEach((p,i)=>{
@@ -228,7 +262,9 @@ function savePlan(){
  try{
   const data=JSON.parse(localStorage.getItem("m-academy-ksp-v1")||"{}");
   data[planStorageKey()]={fields:fields(),phases:phases.map(p=>({...p})),modified:new Date().toISOString()};
-  localStorage.setItem("m-academy-ksp-v1",JSON.stringify(data));$("status").textContent=t("saveOk")
+  localStorage.setItem("m-academy-ksp-v1",JSON.stringify(data));
+  try{const drafts=readAutoDraft();delete drafts[planStorageKey()];localStorage.setItem(AUTO_DRAFT_KEY,JSON.stringify(drafts))}catch{}
+  $("status").textContent=t("saveOk")
  }catch(err){$("status").textContent=t("saveErr")}
 }
 
@@ -351,4 +387,7 @@ $("wordBtn").addEventListener("click",exportDocx);
 $("printBtn").addEventListener("click",()=>{renderDocument();window.print()});
 $("langBtn").addEventListener("click",()=>{lang=lang==="ru"?"kk":"ru";try{localStorage.setItem("m-academy-lang",lang)}catch{}translate()});
 initialize();
+document.addEventListener("input",event=>{if(event.target?.closest("#phases")||sourceFields.some(id=>event.target?.id===id))scheduleAutoDraft()});
+document.addEventListener("change",event=>{if(event.target?.closest("#phases")||sourceFields.some(id=>event.target?.id===id))scheduleAutoDraft()});
+window.addEventListener("pagehide",()=>{if(autoSaveTimer){clearTimeout(autoSaveTimer);saveAutoDraft()}});
 </script></body></html>
