@@ -1,0 +1,55 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>M-academy · Диагностика выпуска</title><style>*{box-sizing:border-box}body{margin:0;font:15px/1.55 system-ui,Segoe UI,sans-serif;background:#f3f6fc;color:#101b35}header{background:#fff;border-bottom:1px solid #dce5f3}.top{max-width:1050px;margin:auto;padding:14px 20px;display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}.brand{font-weight:850;font-size:22px;text-decoration:none;color:#101b35}.brand b{color:#2563eb}.btn{border:1px solid #cad8ed;border-radius:10px;padding:10px 14px;background:#fff;color:#10213d;text-decoration:none;font:inherit;font-weight:750;cursor:pointer}.btn.primary{background:#2563eb;border-color:#2563eb;color:white}main{max-width:1050px;margin:auto;padding:28px 20px 75px}h1{font-size:clamp(29px,3.4vw,42px);margin:6px 0}.lead{color:#60738e}.panel{border:1px solid #dce5f3;border-radius:16px;background:#fff;padding:21px;margin:18px 0;box-shadow:0 8px 25px #122c4509}.notice{background:#fff8e8;border:1px solid #eacf99;padding:13px;border-radius:11px;font-size:13px;color:#875616}.row{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:12px 0;border-bottom:1px solid #e8edf4}.row:last-child{border:0}.row strong{font-size:15px}.row p{color:#657991;font-size:13px;margin:3px 0}.status{font-size:13px;font-weight:800;white-space:nowrap}.pass{color:#047857}.fail{color:#be123c}.idle{color:#64748b}.actions{display:flex;gap:10px;flex-wrap:wrap}.summary{border-radius:11px;padding:14px;background:#eaf2ff;color:#1e40af;margin-top:10px;font-size:14px}.mono{font-family:ui-monospace,Consolas,monospace;white-space:pre-wrap;font-size:12px;max-height:330px;overflow:auto;background:#f8fafc;border:1px solid #e2e8f0;padding:14px;border-radius:11px}@media(max-width:600px){.row{align-items:start;flex-direction:column}main{padding:19px 12px}.panel{padding:15px}}</style></head><body><header><div class="top"><a class="brand" href="./index.html"><b>M</b>-academy</a><a class="btn" href="./qa.html">Ручная приёмка · 24 пункта</a></div></header><main><div style="font-size:12px;color:#2563eb;font-weight:850;letter-spacing:1px">M-ACADEMY · RELEASE HEALTH</div><h1>Автоматическая диагностика</h1><p class="lead">Проверка математического ядра, воспроизводимости вариантов, структуры DOCX/ZIP и локального хранилища в вашем браузере. Она не заменяет методическую экспертизу и проверку интерфейса.</p><div class="notice">Проверка не загружает и не передаёт КТП, КСП или персональные данные. Для теста хранилища используется временная запись, которая удаляется сразу после проверки.</div><section class="panel"><div class="actions"><button class="btn primary" type="button" id="run">Запустить все проверки</button><button class="btn" type="button" id="copy">Скопировать отчёт</button></div><div id="summary" class="summary">Проверка ещё не запускалась.</div><div id="checks"></div></section><section class="panel"><h2>Технический журнал</h2><pre class="mono" id="log">Ожидание запуска.</pre></section></main><script src="./math-engine.js"></script><script src="./docx-utils.js"></script><script>
+"use strict";
+const $=id=>document.getElementById(id);const checks=[
+{name:"Математические генераторы 5–11 классов",desc:"Все 14 направлений выдают корректный числовой формат и двуязычные формулировки."},
+{name:"Воспроизводимость вариантов",desc:"Одинаковые параметры должны создавать одинаковые задания без случайных изменений."},
+{name:"Проверка диапазонов",desc:"Прогрессия, тригонометрия и деление не дают нечисловых значений или деления на ноль."},
+{name:"Создание Word-файла DOCX",desc:"Внутри документа есть XML тела, описание типов содержимого и отношения."},
+{name:"Сборка ZIP-архива комплекта",desc:"Архив содержит ожидаемые имена файлов, корректные сигнатуры и центральный каталог."},
+{name:"Локальное хранилище браузера",desc:"Временная запись сохраняется, считывается и удаляется."}
+];let report="";
+function record(index,ok,detail){const row=document.createElement("div");row.className="row";const body=document.createElement("div"),title=document.createElement("strong");title.textContent=(index+1)+". "+checks[index].name;const p=document.createElement("p");p.textContent=checks[index].desc;body.append(title,p);const label=document.createElement("span");label.className="status "+(ok?"pass":"fail");label.textContent=ok?"ПРОЙДЕНО":"ОШИБКА";row.append(body,label);$("checks").append(row);report+=(ok?"[OK] ":"[FAIL] ")+checks[index].name+" — "+detail+"\n";return ok}
+async function test(){
+ const btn=$("run");btn.disabled=true;$("checks").replaceChildren();report="M-academy automated diagnostics\n"+new Date().toISOString()+"\n\n";$("summary").textContent="Выполняется проверка…";$("log").textContent="";
+ let passed=0;try{
+  const e=window.MAcademyMath,d=window.MAcademyDocs;
+  let errors=0,deterministic=0,rangeIssues=0,examples=0;const ids=e?.topicIds||[];
+  if(ids.length!==14)errors++;
+  for(const id of ids)for(const lvl of ["all","A","B","C"])for(let v=1;v<=40;v++){
+   const a=e.generate(id,lvl,9,v),b=e.generate(id,lvl,9,v);examples+=a.length;
+   if(JSON.stringify(a)!==JSON.stringify(b))deterministic++;
+   if(a.length!==9||a.some(t=>!Number.isFinite(t.ans)||typeof t.solution!=="string"||!t.q?.ru||!t.q?.kk))errors++;
+   if(a.some(t=>!Number.isFinite(t.ans)||Math.abs(t.ans)>1e12))rangeIssues++;
+  }
+  passed+=Number(record(0,errors===0,examples+" примеров; ошибок "+errors));
+  passed+=Number(record(1,deterministic===0,"несовпадений "+deterministic));
+  passed+=Number(record(2,rangeIssues===0,"проблем диапазонов "+rangeIssues));
+  let word=null,wordOk=false,zipOk=false;
+  if(d){
+   word=await d.docx([{type:"title",text:"Арифметическая прогрессия"},{type:"pagebreak"},{type:"paragraph",text:"Қазақша / Русский"},{type:"table",rows:[["А","Б"],["1","2"]],widths:[3500,3500]}]);
+   const names=list(word);wordOk=["[Content_Types].xml","_rels/.rels","word/document.xml"].every(x=>names.includes(x));
+   const all=d.zip([["01_students.docx",word],["02_answers.docx",word],["03_info.txt","test"]]);
+   const bytes=new Uint8Array(await all.arrayBuffer()),names2=list(bytes);
+   const v=new DataView(bytes.buffer),p=bytes.length-22;
+   zipOk=names2.length===3&&v.getUint32(p,true)===0x06054b50&&v.getUint16(p+10,true)===3;
+  }
+  passed+=Number(record(3,wordOk,"DOCX XML members found: "+wordOk));
+  passed+=Number(record(4,zipOk,"Archive file list valid: "+zipOk));
+  let storageOk=false;const key="m-academy-diag-temp";try{const val=String(Date.now());localStorage.setItem(key,val);storageOk=localStorage.getItem(key)===val;localStorage.removeItem(key);storageOk=storageOk&&localStorage.getItem(key)===null}catch{try{localStorage.removeItem(key)}catch{}}
+  passed+=Number(record(5,storageOk,"Temporary localStorage roundtrip: "+storageOk));
+ }catch(err){report+="Unexpected error: "+String(err.stack||err)+"\n"}
+ $("summary").textContent="Пройдено "+passed+" из "+checks.length+" автоматических проверок. "+(passed===checks.length?"Системные компоненты готовы к ручной приёмке.":"Обнаружены ошибки: необходима доработка.");
+ $("log").textContent=report;btn.disabled=false;
+}
+function list(buffer){
+ const bytes=buffer instanceof Uint8Array?buffer:new Uint8Array(buffer),view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength),names=[];let offset=0;
+ while(offset+30<=bytes.length&&view.getUint32(offset,true)===0x04034b50){
+  const size=view.getUint32(offset+18,true),nameLen=view.getUint16(offset+26,true),extraLen=view.getUint16(offset+28,true);
+  names.push(new TextDecoder().decode(bytes.subarray(offset+30,offset+30+nameLen)));
+  offset+=30+nameLen+extraLen+size;
+ }
+ return names;
+}
+$("run").addEventListener("click",test);
+$("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("log").textContent)}catch{window.prompt("Скопируйте отчёт",$("log").textContent)}});
+</script></body></html>
