@@ -104,11 +104,11 @@ export default function AssignmentPage(){
   const score=Number(scoreById[submissionId]);
   if(!Number.isFinite(score)||score<0||score>questions.length){setError('Балл должен быть от 0 до '+questions.length);return}
   setBusy(true);setError('');
-  const result=await sb.from('submission_grades').upsert({
-   school_id:assignment.school_id,submission_id:submissionId,
-   graded_by:userId,score,feedback:(feedbackById[submissionId]||'').trim().slice(0,3000),
-   graded_at:new Date().toISOString()
-  },{onConflict:'submission_id'});
+  const patch={score,feedback:(feedbackById[submissionId]||'').trim().slice(0,3000),graded_at:new Date().toISOString()};
+  const existing=grades.some(g=>g.submission_id===submissionId);
+  const result=existing
+   ?await sb.from('submission_grades').update(patch).eq('submission_id',submissionId).eq('graded_by',userId)
+   :await sb.from('submission_grades').insert({...patch,school_id:assignment.school_id,submission_id:submissionId,graded_by:userId});
   setBusy(false);
   if(result.error)setError(result.error.message);
   else{setMessage('Оценка сохранена.');void reload()}
