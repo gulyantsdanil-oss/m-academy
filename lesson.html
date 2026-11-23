@@ -42,7 +42,7 @@ function renderReview(){
   b.setAttribute("aria-pressed",selected?"true":"false");
  }
  const key=trainerId(cur.topic),supported=!!key&&!!window.MAcademyMath?.topicIds.includes(key);
- $("quizStart").hidden=!supported||!!quizItems;
+ $("quizStart").hidden=!supported||(!!quizItems&&!quizCompleted);
  $("quizIntro").textContent=supported?T("quizIntro"):T("quizUnavailable");
 }
 function buildQuiz(){
