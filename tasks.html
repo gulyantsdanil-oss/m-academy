@@ -6,12 +6,14 @@ let lang="ru";try{lang=localStorage.getItem("m-academy-lang")==="kk"?"kk":"ru"}c
 const txt={ru:{heading:"Генератор математических заданий",intro:"Создание проверяемых вариантов с разными числовыми параметрами. Ответы ученика проверяются локально. Для учителя — ключи и решения.",notice:"Демонстрационная версия. Задания вычисляются в браузере и не собирают персональные данные. Учитель должен проверить соответствие задач учебным целям. Режимы ученика и учителя не являются защищёнными кабинетами.",subjectLabel:"Тема",levelLabel:"Уровень",quantityLabel:"Количество заданий",variantLabel:"Вариант",generate:"Создать вариант",showStudent:"Ученик · без ответов",showTeacher:"Учитель · с решениями",print:"Печать / PDF",export:"Скачать TXT",sendKsp:"Добавить в КСП →",worksheetTitle:"Рабочий лист",footerHelp:"Числовой ответ можно ввести через точку или запятую. Результаты не отправляются на сервер.",catalogLink:"Каталог 5–11",kspLink:"КСП №130",level:["Все уровни","A · Базовый","B · Средний","C · Повышенный"],topics:["9 класс · Арифметическая прогрессия","8 класс · Квадратные уравнения","6 класс · Рациональные числа","5 класс · Проценты","7 класс · Линейная функция","8 класс · Квадратные корни","10 класс · Тригонометрические уравнения","5 класс · Обыкновенные дроби","6 класс · Пропорция","7 класс · Свойства степеней","8 класс · Теорема Пифагора","9 класс · Геометрическая прогрессия","10 класс · Производная функции","11 класс · Логарифм числа"],answer:"Ответ",check:"Проверить",correct:"Верно!",incorrect:"Неверно. Попробуйте ещё раз.",invalid:"Введите число.",solution:"Решение для учителя",score:"Правильно решено",of:"из",variantWord:"вариант",teacher:"Ключи к заданиям",student:"Задания для учащихся",task:"Задание"},kk:{heading:"Математика тапсырмаларының генераторы",intro:"Сандық параметрлері өзгеретін тапсырмалар. Оқушы жауабы браузерде тексеріледі, мұғалімге жауап пен шешім беріледі.",notice:"Демонстрациялық нұсқа. Тапсырмалар браузерде есептеледі және жеке деректер жиналмайды. Мұғалім тапсырмалардың оқу мақсаттарына сәйкестігін тексеруі керек. Оқушы/мұғалім режимдері қорғалған кабинет емес.",subjectLabel:"Тақырып",levelLabel:"Деңгей",quantityLabel:"Тапсырма саны",variantLabel:"Нұсқа",generate:"Нұсқа құру",showStudent:"Оқушы · жауапсыз",showTeacher:"Мұғалім · шешіммен",print:"Басып шығару / PDF",export:"TXT жүктеу",sendKsp:"ҚМЖ-ға қосу →",worksheetTitle:"Жұмыс парағы",footerHelp:"Жауапты нүкте немесе үтірмен енгізуге болады. Нәтижелер серверге жіберілмейді.",catalogLink:"5–11 каталогы",kspLink:"№130 ҚМЖ",level:["Барлық деңгей","A · Базалық","B · Орта","C · Жоғары"],topics:["9-сынып · Арифметикалық прогрессия","8-сынып · Квадрат теңдеулер","6-сынып · Рационал сандар","5-сынып · Пайыздар","7-сынып · Сызықтық функция","8-сынып · Квадрат түбірлер","10-сынып · Тригонометриялық теңдеулер","5-сынып · Жай бөлшектер","6-сынып · Пропорция","7-сынып · Дәрежелердің қасиеттері","8-сынып · Пифагор теоремасы","9-сынып · Геометриялық прогрессия","10-сынып · Туынды","11-сынып · Логарифм"],answer:"Жауап",check:"Тексеру",correct:"Дұрыс!",incorrect:"Қате. Қайта көріңіз.",invalid:"Сан енгізіңіз.",solution:"Мұғалімге арналған шешімі",score:"Дұрыс жауап",of:"ішінен",variantWord:"нұсқа",teacher:"Тапсырмалар жауабы",student:"Оқушы тапсырмалары",task:"Тапсырма"}};
 const T=k=>txt[lang][k]||k;
 const params=new URLSearchParams(location.search),initialTopic=params.get("topic")||"";
-if(/арифметич|арифметикал/i.test(initialTopic))$("subject").value="progression";
-else if(/квадратн|квадрат теңдеу/i.test(initialTopic))$("subject").value="quadratic";
+if(window.MAcademyMath?.topicIds.includes(initialTopic))$("subject").value=initialTopic;
+else if(/арифметическ.*прогресс|арифметикалық прогресс/i.test(initialTopic))$("subject").value="progression";
+else if(/квадратные корни|квадрат түбір/i.test(initialTopic))$("subject").value="roots";
+else if(/квадратные уравнения|квадрат теңдеу/i.test(initialTopic))$("subject").value="quadratic";
 else if(/рационал/i.test(initialTopic))$("subject").value="rational";
 else if(/процент|пайыз/i.test(initialTopic))$("subject").value="percent";
 else if(/линейн.*функц|сызықтық функция/i.test(initialTopic))$("subject").value="linear";
-else if(/квадратн.*корн|квадрат түбір/i.test(initialTopic))$("subject").value="roots";
+
 else if(/тригонометрич.*уравнен|тригонометриялық теңдеу/i.test(initialTopic))$("subject").value="trig";
 else if(/обыкновенные дроби|жай бөлшек/i.test(initialTopic))$("subject").value="fractions";
 else if(/пропорция|пропорция/i.test(initialTopic))$("subject").value="proportion";
@@ -22,9 +24,18 @@ else if(/производная функции|туынды/i.test(initialTopic)
 else if(/логарифм числа|логарифм/i.test(initialTopic))$("subject").value="logarithm";
 const clamp=(n,lo,hi)=>Math.max(lo,Math.min(hi,n));
 const {fmt,rngFor,generators}=window.MAcademyMath;let mode="student",items=[],correct=new Set();
+let generatedSettings="";
+function currentSettings(){
+ return [$("subject").value,$("level").value,$("quantity").value,String(clamp(Number($("variant").value)||1,1,99999))].join("|");
+}
+function ensureGenerated(){
+ if(generatedSettings!==currentSettings())generate();
+}
 function generate(){
  const count=Number($("quantity").value),topic=$("subject").value,lvl=$("level").value,v=clamp(Number($("variant").value)||1,1,99999);
+ $("variant").value=String(v);
  items=window.MAcademyMath.generate(topic,lvl,count,v);correct=new Set();
+ generatedSettings=currentSettings();
  render();if(document.getElementById("bundleStatus"))bundleStatus();
 }
 function answerNumber(raw){const s=String(raw).trim().replace(",",".").replace(/\s/g,"");if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(s))return null;const n=Number(s);return Number.isFinite(n)?n:null}
@@ -70,6 +81,7 @@ $("showTeacher").addEventListener("click",()=>{mode="teacher";render()});
 $("language").addEventListener("click",()=>{lang=lang==="ru"?"kk":"ru";try{localStorage.setItem("m-academy-lang",lang)}catch{}translate()});
 $("multiLink").addEventListener("click",()=>{location.href="./multivariant.html?topic="+encodeURIComponent($("subject").value)});
 $("studentLink").addEventListener("click",async()=>{
+ ensureGenerated();
  const url=new URL("./student.html",location.href);
  url.searchParams.set("topic",$("subject").value);
  url.searchParams.set("level",$("level").value);
@@ -79,12 +91,14 @@ $("studentLink").addEventListener("click",async()=>{
  catch{window.prompt(lang==="ru"?"Скопируйте ссылку":"Сілтемені көшіріңіз",url.toString())}
 });
 $("liveJump").addEventListener("click",()=>{
+ ensureGenerated();
  const idx=["progression","quadratic","rational","percent","linear","roots","trig","fractions","proportion","powers","pythagoras","geometric","derivative","logarithm"].indexOf($("subject").value);
  const payload={topic:txt[lang].topics[idx],variant:$("variant").value,items:items.map(x=>({level:x.level,q:x.q,ans:x.ans,solution:x.solution}))};
  try{sessionStorage.setItem("m-academy-live-variant",JSON.stringify(payload))}catch{}
  location.href="./classroom.html";
 });
 $("sendKsp").addEventListener("click",()=>{
+ ensureGenerated();
  const key=$("subject").value;
  const grade={progression:"9",quadratic:"8",rational:"6",percent:"5",linear:"7",roots:"8",trig:"10",fractions:"5",proportion:"6",powers:"7",pythagoras:"8",geometric:"9",derivative:"10",logarithm:"11"}[key];
  const subject={progression:"algebra",quadratic:"algebra",rational:"math",percent:"math",linear:"algebra",roots:"algebra",trig:"analysis",fractions:"math",proportion:"math",powers:"algebra",pythagoras:"geometry",geometric:"algebra",derivative:"analysis",logarithm:"analysis"}[key];
@@ -194,6 +208,7 @@ function bundleKspBlocks(saved){
  return blocks;
 }
 $("bundleDownload").addEventListener("click",async()=>{
+ ensureGenerated();
  const button=$("bundleDownload");button.disabled=true;
  $("bundleStatus").textContent=lang==="ru"?"Подготовка документов Word…":"Word құжаттары дайындалуда…";
  try{
@@ -223,5 +238,7 @@ $("bundleDownload").addEventListener("click",async()=>{
  }catch(error){$("bundleStatus").textContent=(lang==="ru"?"Ошибка экспорта: ":"Экспорт қатесі: ")+String(error.message||error)}
  finally{button.disabled=false}
 });
+for(const id of ["subject","level","quantity"]){$(id).addEventListener("change",generate)}
+$("variant").addEventListener("change",generate);
 generate();translate();bundleStatus();if(params.get("bundle")==="1")requestAnimationFrame(()=>document.getElementById("bundle").scrollIntoView({block:"start"}));
 </script></body></html>
