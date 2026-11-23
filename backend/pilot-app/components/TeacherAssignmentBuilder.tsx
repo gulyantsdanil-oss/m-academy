@@ -1,5 +1,5 @@
 'use client';
-import {useState} from 'react';
+import {useState,type FormEvent} from 'react';
 import {getSupabase} from '@/lib/supabase';
 import type {ClassRoom,TeacherAssignment} from '@/lib/types';
 
@@ -29,7 +29,7 @@ export function TeacherAssignmentBuilder({
  function update(index:number,field:keyof Question,value:string){
   setQuestions(q=>q.map((item,i)=>i===index?{...item,[field]:value}:item))
  }
- async function create(e:React.FormEvent){
+ async function create(e:FormEvent){
   e.preventDefault();
   const sb=getSupabase();
   if(!sb||!chosen||busy)return;
