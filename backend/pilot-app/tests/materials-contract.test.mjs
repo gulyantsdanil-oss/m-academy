@@ -41,3 +41,16 @@ test('Legacy backup is previewed locally, never silently uploaded',()=>{
  assert.match(teacher,/Содержимое загружено только в редактор/);
  assert.match(teacher,/setImports\(rows\.slice\(0,500\)\)/);
 });
+
+test('Teacher material editor exposes visual KSP stage and KTP topic fields',()=>{
+ const form=readFileSync(new URL('../components/MaterialForm.tsx',import.meta.url),'utf8');
+ assert.match(form,/fieldsKsp/);
+ assert.match(form,/Действия педагога/);
+ assert.match(form,/Действия ученика/);
+ assert.match(form,/Оценивание/);
+ assert.match(form,/Ресурсы/);
+ assert.match(form,/rowsKtp/);
+ assert.match(form,/Добавить тему/);
+ assert.match(teacher,/MaterialForm/);
+ assert.match(teacher,/showJson/);
+});
