@@ -73,7 +73,13 @@ export default function AssignmentPage(){
   }else{
    const old=await sb.from('submissions').select('id').eq('assignment_id',id).eq('student_id',uid).maybeSingle();
    if(old.error)setError(old.error.message);
-   setMine(old.data?.id||null);
+   const submissionId=old.data?.id||null;
+   setMine(submissionId);
+   if(submissionId){
+    const graded=await sb.from('submission_grades').select('submission_id,score,feedback').eq('submission_id',submissionId).maybeSingle();
+    if(graded.error)setError(graded.error.message);
+    setGrades(graded.data?[graded.data as Grade]:[]);
+   }
   }
   setLoading(false);
  },[id]);
@@ -121,6 +127,10 @@ export default function AssignmentPage(){
  {kind==='student'&&!mine&&<><label htmlFor={q.id}>Ваш ответ</label><input id={q.id} value={values[q.id]||''} maxLength={1000} onChange={e=>setValues(v=>({...v,[q.id]:e.target.value}))}/></>}
  {kind==='teacher'&&<p className="muted">Ключ педагога: {keys[q.id]||'—'}</p>}
  </div>)}
+ {kind==='student'&&mine&&grades.length>0&&<div className="card" style={{background:'#ecfdf5'}}>
+ <h3>Проверка учителя</h3><p><b>Балл: {grades[0].score} из {questions.length}</b></p>
+ {grades[0].feedback&&<p>Комментарий: {grades[0].feedback}</p>}
+ </div>}
  {kind==='student'&&(mine?<div className="success">Ответы уже отправлены. Повторная отправка закрыта.</div>:
  <button className="btn primary" disabled={busy||!assignment.published} onClick={()=>void submit()}>{busy?'Отправка…':'Отправить ответы'}</button>)}
  </section>
