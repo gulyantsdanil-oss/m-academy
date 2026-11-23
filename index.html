@@ -23,7 +23,6 @@
 <section id="about"><div class="wrap"><div class="banner"><div><h2 data-t="aboutTitle">Математика нового поколения</h2><p data-t="aboutDesc">M-academy — цифровая образовательная инициатива школы-лицея имени М. Ауэзова.</p></div><a class="btn blue" href="#grades" data-t="start">Начать обучение →</a></div></div></section>
 </main>
 <footer><div class="wrap foot"><strong>M-academy © 2026</strong><span data-t="school">Школа-лицей имени М. Ауэзова · Мерке</span></div></footer>
-<div class="overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle"><div class="dialog"><button class="x" id="closeModal" aria-label="Закрыть">×</button><h2 id="loginTitle" data-t="loginTitle">Вход в M-academy</h2><p class="muted" data-t="loginDesc">Личный кабинет преподавателя</p><form id="loginForm"><label for="username" data-t="username">Логин</label><input id="username" type="text" autocomplete="username" required><label for="password" data-t="password">Пароль</label><input id="password" type="password" autocomplete="current-password" required><button class="btn blue" type="submit" data-t="login">Войти</button></form><div class="notice" data-t="notice">Демонстрация: настоящая авторизация ещё не подключена. Не вводите реальные пароли.</div></div></div>
 <div class="toast" id="toast" role="status"></div>
 <script>
 const copy={
@@ -33,14 +32,12 @@ kk:{catalog:"Каталог",bank:"Тапсырмалар",hub:"Мұғалім �
 let lang="ru";try{lang=localStorage.getItem("m-academy-lang")==="kk"?"kk":"ru"}catch{}
 const t=k=>copy[lang][k]||k;
 function render(){document.documentElement.lang=lang;document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));document.querySelectorAll("[data-t-html]").forEach(el=>el.innerHTML=t(el.dataset.tHtml));document.getElementById("language").textContent=lang==="ru"?"ҚАЗ":"РУС";document.getElementById("gradeGrid").innerHTML=[5,6,7,8,9,10,11].map(n=>'<button type="button" class="grade" data-grade="'+n+'"><span class="symbol">✧</span><strong>'+n+'</strong><small>'+t("grade")+' →</small></button>').join("");document.getElementById("featuresGrid").innerHTML=copy[lang].featureItems.map(f=>'<article class="feature"><span class="symbol">'+f[0]+'</span><h3>'+f[1]+'</h3><p>'+f[2]+'</p></article>').join("")}
-const modal=document.getElementById("modal");const toast=document.getElementById("toast");let toastTimer;
+const toast=document.getElementById("toast");let toastTimer;
 function notify(message){toast.textContent=message;toast.classList.add("visible");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("visible"),4200)}
-function closeModal(){modal.classList.remove("open");document.getElementById("password").value="";document.getElementById("language").focus()}
 document.getElementById("language").addEventListener("click",()=>{lang=lang==="ru"?"kk":"ru";try{localStorage.setItem("m-academy-lang",lang)}catch{}render()});
 document.getElementById("gradeGrid").addEventListener("click",e=>{const b=e.target.closest("[data-grade]");if(b)location.href="./catalog.html?grade="+encodeURIComponent(b.dataset.grade)});
 
-document.getElementById("closeModal").addEventListener("click",closeModal);modal.addEventListener("click",e=>{if(e.target===modal)closeModal()});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("open"))closeModal()});
-document.getElementById("loginForm").addEventListener("submit",e=>{e.preventDefault();notify(t("loginPending"));document.getElementById("password").value=""});
+
 render();
 </script>
 </body>
