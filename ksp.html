@@ -263,6 +263,7 @@ function savePlan(){
   const data=JSON.parse(localStorage.getItem("m-academy-ksp-v1")||"{}");
   data[planStorageKey()]={fields:fields(),phases:phases.map(p=>({...p})),modified:new Date().toISOString()};
   localStorage.setItem("m-academy-ksp-v1",JSON.stringify(data));
+  if(autoSaveTimer){clearTimeout(autoSaveTimer);autoSaveTimer=null}
   try{const drafts=readAutoDraft();delete drafts[planStorageKey()];localStorage.setItem(AUTO_DRAFT_KEY,JSON.stringify(drafts))}catch{}
   $("status").textContent=t("saveOk")
  }catch(err){$("status").textContent=t("saveErr")}
@@ -389,5 +390,5 @@ $("langBtn").addEventListener("click",()=>{lang=lang==="ru"?"kk":"ru";try{localS
 initialize();
 document.addEventListener("input",event=>{if(event.target?.closest("#phases")||sourceFields.some(id=>event.target?.id===id))scheduleAutoDraft()});
 document.addEventListener("change",event=>{if(event.target?.closest("#phases")||sourceFields.some(id=>event.target?.id===id))scheduleAutoDraft()});
-window.addEventListener("pagehide",()=>{if(autoSaveTimer){clearTimeout(autoSaveTimer);saveAutoDraft()}});
+window.addEventListener("pagehide",()=>{if(autoSaveTimer){clearTimeout(autoSaveTimer);autoSaveTimer=null;saveAutoDraft()}});
 </script></body></html>
