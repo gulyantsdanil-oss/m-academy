@@ -1,0 +1,70 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>M-academy · Самостоятельная работа</title>
+<style>:root{--navy:#101b35;--blue:#2563eb;--line:#dde6f2;--muted:#61748d;--bg:#f3f6fc}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--navy);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{cursor:pointer}header{background:white;border-bottom:1px solid var(--line)}.top{max-width:1090px;padding:15px 20px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}.brand{font-size:23px;font-weight:850;color:var(--navy);text-decoration:none}.brand b{color:var(--blue)}.nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}a{color:var(--blue)}.btn{padding:10px 14px;border:1px solid #d2deed;border-radius:10px;background:white;color:var(--navy);font-weight:700;text-decoration:none}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn:disabled{opacity:.6;cursor:not-allowed}main{max-width:1090px;margin:auto;padding:32px 20px 65px}.eyebrow{letter-spacing:1.3px;font-size:12px;font-weight:850;color:var(--blue)}h1{font-size:clamp(28px,3.3vw,43px);margin:7px 0}h2{font-size:21px;margin:0 0 10px}.muted{color:var(--muted)}.warning{background:#fff9ee;border:1px solid #ecd4a1;border-radius:12px;padding:13px 15px;font-size:13px;color:#895816;margin:17px 0}.panel,.task{background:white;border:1px solid var(--line);border-radius:16px;padding:22px;margin:16px 0;box-shadow:0 9px 20px #152c4308}.overview{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}.meta{font-size:13px;color:var(--muted)}.progress{height:12px;background:#e5edfa;border-radius:40px;margin:15px 0;overflow:hidden}.fill{background:var(--blue);height:100%;width:0;transition:width .2s}.taskhead{display:flex;justify-content:space-between;gap:8px}.pill{background:#eaf1ff;color:#1d4ed8;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:800}.question{font-size:18px;font-weight:650;margin:18px 0}.answerrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.answerrow input{border-radius:10px;border:1px solid #cad7e9;padding:11px 12px;max-width:245px;width:100%}.result{margin-top:11px;padding:10px 13px;border-radius:9px;background:#f1f5f9;font-size:14px;white-space:pre-wrap}.result[hidden]{display:none}.result.good{background:#ecfdf5;color:#047857}.result.bad{background:#fff7ed;color:#9a3412}.summary{padding:22px;border:1px solid #bbefd2;background:#f0fdf4;border-radius:15px}.summary[hidden]{display:none}.big{font-size:38px;font-weight:850}.actions{display:flex;gap:11px;flex-wrap:wrap;margin:18px 0}.empty{padding:45px 22px;text-align:center}.footer{font-size:13px;color:var(--muted)}@media(max-width:550px){main{padding:20px 12px}.panel,.task{padding:15px}.question{font-size:16px}}@media print{header,.actions,.warning,.answerrow .btn{display:none!important}main{padding:0}.panel,.task{box-shadow:none;break-inside:avoid}.task{margin:7px 0}.result[hidden]{display:none}}</style>
+</head><body><header><div class="top"><a class="brand" href="./index.html"><b>M</b>-academy</a><div class="nav"><a class="btn" href="./catalog.html" id="catalogLink">Каталог</a><button class="btn" id="language" type="button">ҚАЗ</button></div></div></header><main><span class="eyebrow">M-ACADEMY · STUDENT PRACTICE</span><h1 id="title">Самостоятельная работа</h1><p id="intro" class="muted">Решайте задачи по порядку. После завершения получите результат и разбор ответов.</p><div id="warning" class="warning">Это учебный тренажёр, а не защищённый экзамен. Ответы и результаты хранятся только в этом браузере; учитель не получает их автоматически. Не вводите личные данные.</div><section class="panel" id="overview"><div class="overview"><div><h2 id="topic">Математика</h2><span class="meta" id="detail"></span></div><div><strong id="progressLabel">0 / 6</strong><div class="meta" id="progressText">Заполнено</div></div></div><div class="progress"><div class="fill" id="progress"></div></div></section><div id="tasks"></div><section class="panel" id="empty" hidden><div class="empty"><h2 id="emptyTitle">Ссылка на работу не найдена</h2><p id="emptyDescription">Откройте ссылку, созданную учителем в банке заданий.</p><a href="./tasks.html" class="btn primary" id="emptyLink">Открыть банк заданий</a></div></section><section class="panel" id="controls"><div class="actions"><button type="button" id="finish" class="btn primary">Завершить и проверить</button><button type="button" id="reset" class="btn">Начать заново</button><button type="button" id="print" class="btn">Печать / PDF</button></div><p id="state" class="meta" aria-live="polite"></p></section><section class="summary" id="summary" hidden><h2 id="summaryTitle">Результат работы</h2><div class="big" id="score"></div><p id="summaryText"></p><p class="muted" id="summaryNote"></p></section><p class="footer" id="footer">Для новой работы учитель должен предоставить новую ссылку с вариантом. Это приложение не собирает результаты всего класса.</p></main><script src="./math-engine.js"></script><script>
+"use strict";
+const $=id=>document.getElementById(id),engine=window.MAcademyMath,params=new URLSearchParams(location.search);
+const topics={progression:["Арифметическая прогрессия","Арифметикалық прогрессия"],quadratic:["Квадратные уравнения","Квадрат теңдеулер"],rational:["Рациональные числа","Рационал сандар"],percent:["Проценты","Пайыздар"],linear:["Линейная функция","Сызықтық функция"],roots:["Квадратные корни","Квадрат түбірлер"],trig:["Тригонометрические уравнения","Тригонометриялық теңдеулер"],fractions:["Обыкновенные дроби","Жай бөлшектер"],proportion:["Пропорция","Пропорция"],powers:["Свойства степеней","Дәрежелердің қасиеттері"],pythagoras:["Теорема Пифагора","Пифагор теоремасы"],geometric:["Геометрическая прогрессия","Геометриялық прогрессия"],derivative:["Производная функции","Туынды"],logarithm:["Логарифм числа","Логарифм"]};
+const copy={ru:{catalogLink:"Каталог",title:"Самостоятельная работа",intro:"Решайте задачи по порядку. После завершения получите результат и разбор ответов.",warning:"Это учебный тренажёр, а не защищённый экзамен. Ответы и результаты хранятся только в этом браузере; учитель не получает их автоматически. Не вводите личные данные.",progressText:"Заполнено",emptyTitle:"Ссылка на работу не найдена",emptyDescription:"Откройте ссылку, созданную учителем в банке заданий.",emptyLink:"Открыть банк заданий",finish:"Завершить и проверить",reset:"Начать заново",print:"Печать / PDF",summaryTitle:"Результат работы",footer:"Для новой работы учитель должен предоставить новую ссылку с вариантом. Это приложение не собирает результаты всего класса.",task:"Задание",level:"Уровень",variant:"Вариант",answer:"Ваш ответ",correct:"Верно",incorrect:"Ошибка",missing:"Нет ответа",solution:"Решение",total:"Задания",confirm:"Завершить работу? После этого появятся ответы.",resetConfirm:"Очистить свои ответы и начать заново?",summaryText:"Проверьте решения и обратите внимание на допущенные ошибки.",summaryNote:"Результат не отправлен учителю. При необходимости распечатайте страницу или сохраните в PDF.",invalid:"Необходимо заполнить все ответы. Незаполненных заданий: ",saved:"Ваши ответы сохранены на этом устройстве.",graded:"Проверка завершена.",numeric:"Введите число (точка или запятая)."},kk:{catalogLink:"Каталог",title:"Өзіндік жұмыс",intro:"Тапсырмаларды ретімен орындаңыз. Соңында нәтиже мен шешімін көре аласыз.",warning:"Бұл оқу тренажёрі, қорғалған емтихан емес. Жауаптар тек осы браузерде сақталады, мұғалімге автоматты түрде жіберілмейді. Жеке деректерді енгізбеңіз.",progressText:"Толтырылған",emptyTitle:"Жұмыс сілтемесі табылмады",emptyDescription:"Мұғалім тапсырмалар банкінен жасаған сілтемені ашыңыз.",emptyLink:"Тапсырмалар банкін ашу",finish:"Аяқтау және тексеру",reset:"Басынан бастау",print:"Басып шығару / PDF",summaryTitle:"Жұмыс нәтижесі",footer:"Жаңа тапсырма үшін мұғалім басқа нұсқаға сілтеме береді. Қосымша сынып нәтижелерін жинамайды.",task:"Тапсырма",level:"Деңгей",variant:"Нұсқа",answer:"Сіздің жауабыңыз",correct:"Дұрыс",incorrect:"Қате",missing:"Жауап жоқ",solution:"Шешімі",total:"Тапсырмалар",confirm:"Жұмысты аяқтайсыз ба? Жауаптар көрсетіледі.",resetConfirm:"Жауаптарды өшіріп, қайта бастайсыз ба?",summaryText:"Шешімдерді қарап, қателерді талдаңыз.",summaryNote:"Нәтиже мұғалімге жіберілмеді. Қажет болса PDF сақтаңыз.",invalid:"Барлық тапсырмаға жауап беріңіз. Бос жауаптар: ",saved:"Жауаптарыңыз осы құрылғыда сақталды.",graded:"Тексеру аяқталды.",numeric:"Сан енгізіңіз (нүкте немесе үтір)."}};
+let lang="ru";try{lang=localStorage.getItem("m-academy-lang")==="kk"?"kk":"ru"}catch{}
+const T=k=>copy[lang][k]||k;
+const topic=params.get("topic")||"",level=params.get("level")||"all",count=Number(params.get("count")||6),variant=Number(params.get("variant")||1);
+const valid=Object.hasOwn(topics,topic)&&["A","B","C","all"].includes(level)&&Number.isSafeInteger(count)&&count>=1&&count<=20&&Number.isSafeInteger(variant)&&variant>=1&&variant<=99999;
+let items=[],answers=[],finished=false,storageKey="";
+if(valid&&engine){
+ items=engine.generate(topic,level,count,variant);storageKey="m-academy-student-v1::"+topic+"::"+level+"::"+count+"::"+variant;
+ try{const old=JSON.parse(localStorage.getItem(storageKey)||"null");if(old&&Array.isArray(old.answers)&&old.answers.length===count){answers=old.answers.map(v=>String(v??"").slice(0,80));finished=!!old.finished}}catch{}
+ if(!answers.length)answers=Array(count).fill("");
+}
+function persist(){try{localStorage.setItem(storageKey,JSON.stringify({answers,finished}))}catch{}}
+function numeric(s){const clean=String(s).trim().replace(",",".");return /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(clean)?Number(clean):null}
+function render(){
+ document.documentElement.lang=lang;
+ for(const id of ["catalogLink","title","intro","warning","progressText","emptyTitle","emptyDescription","emptyLink","finish","reset","print","summaryTitle","footer"])$(id).textContent=T(id);
+ $("language").textContent=lang==="ru"?"ҚАЗ":"РУС";
+ $("empty").hidden=valid;$("controls").hidden=!valid;$("overview").hidden=!valid;
+ if(!valid||!engine){$("tasks").replaceChildren();$("summary").hidden=true;return}
+ $("topic").textContent=topics[topic][lang==="ru"?0:1];
+ $("detail").textContent=T("variant")+" "+variant+" · "+T("total")+": "+count+" · "+(level==="all"?"A/B/C":level);
+ const container=$("tasks");container.replaceChildren();
+ let right=0;
+ items.forEach((item,i)=>{
+  const panel=document.createElement("article");panel.className="task";
+  const head=document.createElement("div");head.className="taskhead";
+  const name=document.createElement("strong");name.textContent=T("task")+" "+(i+1);
+  const lvl=document.createElement("span");lvl.className="pill";lvl.textContent=item.level;head.append(name,lvl);
+  const q=document.createElement("div");q.className="question";q.textContent=item.q[lang];panel.append(head,q);
+  const row=document.createElement("div");row.className="answerrow",input=document.createElement("input");
+  input.type="text";input.inputMode="decimal";input.autocomplete="off";input.placeholder=T("answer");input.value=answers[i];input.disabled=finished;input.setAttribute("aria-label",T("answer")+" "+(i+1));
+  input.addEventListener("input",()=>{answers[i]=input.value.slice(0,80);persist();updateProgress()});row.append(input);panel.append(row);
+  if(finished){
+   const n=numeric(answers[i]),passed=n!==null&&Math.abs(n-item.ans)<=1e-6;if(passed)right++;
+   const div=document.createElement("div");div.className="result "+(passed?"good":"bad");
+   div.textContent=(passed?T("correct"):n===null?T("missing"):T("incorrect"))+" · "+T("answer")+": "+engine.fmt(item.ans)+"\n"+T("solution")+": "+item.solution;panel.append(div)
+  }
+  container.append(panel);
+ });
+ $("summary").hidden=!finished;if(finished){$("score").textContent=right+" / "+count;$("summaryText").textContent=T("summaryText");$("summaryNote").textContent=T("summaryNote")}
+ $("finish").disabled=finished;$("state").textContent=finished?T("graded"):T("saved");updateProgress();
+}
+function updateProgress(){
+ if(!valid)return;
+ const filled=answers.filter(v=>numeric(v)!==null).length;
+ $("progressLabel").textContent=filled+" / "+count;
+ $("progress").style.width=(filled/count*100)+"%";
+}
+$("finish").addEventListener("click",()=>{
+ if(!valid||finished)return;
+ const empty=answers.filter(x=>numeric(x)===null).length;
+ if(empty){$("state").textContent=T("invalid")+empty;return}
+ if(!confirm(T("confirm")))return;finished=true;persist();render();$("summary").scrollIntoView({behavior:"smooth",block:"center"})
+});
+$("reset").addEventListener("click",()=>{
+ if(!valid||!confirm(T("resetConfirm")))return;
+ answers=Array(count).fill("");finished=false;persist();render();window.scrollTo({top:0,behavior:"smooth"})
+});
+$("language").addEventListener("click",()=>{
+ lang=lang==="ru"?"kk":"ru";try{localStorage.setItem("m-academy-lang",lang)}catch{}render()
+});
+$("print").addEventListener("click",()=>window.print());
+render();
+</script></body></html>
