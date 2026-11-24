@@ -4,6 +4,11 @@ import {getSupabase} from '@/lib/supabase';
 import type {ClassRoom,TeacherAssignment} from '@/lib/types';
 
 type Question={question:string;answer:string;level:'A'|'B'|'C'};
+const arithmeticSample:Question[]=[
+ {question:"Найдите пятый член арифметической прогрессии, если a₁ = 2, d = 3.",answer:"14",level:"A"},
+ {question:"Найдите десятый член арифметической прогрессии, если a₃ = 11, d = 4.",answer:"39",level:"B"},
+ {question:"Найдите сумму первых 15 членов арифметической прогрессии, если a₁ = 5, d = 2.",answer:"285",level:"C"}
+];
 const initial=():Question[]=>[
  {question:'',answer:'',level:'A'},
  {question:'',answer:'',level:'B'},
@@ -77,6 +82,7 @@ export function TeacherAssignmentBuilder({
  if(!options.length)return <section className="card"><h2>Создание задания</h2><p className="muted">Для начала администратор должен назначить учителя на класс и предмет.</p></section>;
  return <section className="card"><h2>Создать задание для класса</h2>
  <p className="muted">В этом прототипе учитель вручную задаёт вопросы и отдельные правильные ответы. После сохранения ключи остаются в закрытой таблице.</p>
+ <div className="actions"><button className="btn" type="button" disabled={busy} onClick={()=>{setTopic("Арифметическая прогрессия");setQuestions(arithmeticSample.map(q=>({...q})));setMessage("Пример загружен. Проверьте задания и ответы перед публикацией.");setError("");}}>Заполнить пример по арифметической прогрессии</button></div>
  <form onSubmit={e=>void create(e)}>
  <label htmlFor="assignmentClass">Мой класс</label>
  <select id="assignmentClass" value={chosen} onChange={e=>setClassId(e.target.value)}>
