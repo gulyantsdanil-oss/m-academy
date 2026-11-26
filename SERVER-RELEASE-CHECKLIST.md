@@ -1,3 +1,14 @@
+## Контролируемый выпуск образа GHCR — 26 ноября 2026
+
+- `.github/workflows/pilot-image-release.yml` добавлен **ручной** `workflow_dispatch` для выпуска образа. Автопубликации на каждый push нет: требуется ветка `main` и ввод `TEST-ONLY`.
+- Проверяются публичные GitHub variables `PILOT_SUPABASE_URL`, `PILOT_SUPABASE_PUBLISHABLE_KEY`, `PILOT_SITE_URL`; без них процесс останавливается, **не публикуя** образ.
+- Workflow выполняет OAuth preflight, тесты, TypeScript, сборку Docker, HTTP smoke и контроль UID 1001 **до** публикации в `ghcr.io` с привязкой к конкретному SHA коммита.
+- Создан контрактный тест `backend/pilot-app/tests/pilot-image-release.test.mjs`, проверяющий обязательное ручное подтверждение, порядок проверки и отсутствие служебных ключей в pipeline.
+- [GitHub Actions: три группы проверок прошли](https://github.com/gulyantsdanil-oss/m-academy/actions/runs/45808968886): `pilot-validation`, `container-smoke`, `postgres-migration-smoke`.
+- [Процедура выпуска](DEPLOYMENT-PILOT.md).
+
+**Не опубликовано:** запуск ручного release workflow сознательно не выполнялся без адреса действительного тестового Supabase и утверждённого HTTPS-хостинга. GHCR-пакет и постоянно работающий публичный сервер пока не подтверждены. Google OAuth не активирован. Следующее действие владельца на финальном этапе — согласовать конкретный хостинг, тестовый проект Supabase и настройку Google OAuth. Не добавлять персональные данные школьников до нормативной и технической приёмки.
+
 ## Переносимая Docker-сборка — 26 ноября 2026
 
 - `backend/pilot-app/next.config.mjs`: включён `output: 'standalone'` для компактного серверного размещения.
