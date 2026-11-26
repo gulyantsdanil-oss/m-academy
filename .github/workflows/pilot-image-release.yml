@@ -1,0 +1,83 @@
+name: M-academy pilot — publish server image
+
+# Explicit manual staging release only. Does NOT deploy to a live website.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Enter TEST-ONLY to confirm this build is for adult test accounts only"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: m-academy-pilot-image-publish
+  cancel-in-progress: false
+
+jobs:
+  publish-test-image:
+    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'TEST-ONLY'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Public repository variables; never service-role credentials.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.PILOT_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PILOT_SUPABASE_PUBLISHABLE_KEY }}
+      PILOT_SITE_URL: ${{ vars.PILOT_SITE_URL }}
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Checkout pinned main revision
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate pilot release configuration (fail closed)
+        working-directory: backend/pilot-app
+        run: |
+          set -euo pipefail
+          test -n "$NEXT_PUBLIC_SUPABASE_URL"
+          test -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY"
+          test -n "$PILOT_SITE_URL"
+          node scripts/oauth-preflight.mjs
+      - name: Test sources and TypeScript before publication
+        working-directory: backend/pilot-app
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npm test
+          npm run lint
+      - name: Build staging image (no service secrets)
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY}:pilot-${GITHUB_SHA::12}"
+          echo "PILOT_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          docker build \
+            --file backend/pilot-app/Dockerfile \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+            --tag "$IMAGE" \
+            backend/pilot-app
+      - name: Test real HTTP routes inside staging image
+        run: |
+          set -euo pipefail
+          docker run --detach --name m-academy-staging-smoke \
+            -p 3119:3000 "$PILOT_IMAGE"
+          trap 'docker rm -f m-academy-staging-smoke >/dev/null 2>&1 || true' EXIT
+          node backend/pilot-app/scripts/http-smoke.mjs http://127.0.0.1:3119
+          test "$(docker exec m-academy-staging-smoke id -u)" = 1001
+      - name: Authenticate to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish immutable pilot revision to GHCR
+        run: |
+          set -euo pipefail
+          docker push "$PILOT_IMAGE"
+          echo "Published test-only image: $PILOT_IMAGE"
+          echo "Not deployed: separate approved hosting is still required."
