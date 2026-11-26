@@ -50,7 +50,7 @@ test('teacher assignment publication is one invoker-rights SQL transaction',()=>
 test('curriculum sync is transactional and refuses linked topic mutations',()=>{
  const sql=read('../supabase/migrations/20261126_atomic_curriculum_sync.sql');
  assert.match(sql,/security invoker/);
- assert.match(sql,/for update/);
+ assert.match(sql,/pg_catalog\.pg_advisory_xact_lock/);
  assert.match(sql,/Linked topic changed at position/);
  assert.match(sql,/on conflict\(plan_id,position\) do update/);
  assert.match(sql,/grant execute on function public\.sync_curriculum_topics/);
