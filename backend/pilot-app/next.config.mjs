@@ -1,6 +1,7 @@
 /** Pilot deployment hardening. No credentials are stored in source. */
 const nextConfig={
  reactStrictMode:true,
+ output:'standalone',
  async headers(){
   return [{
    source:'/:path*',
