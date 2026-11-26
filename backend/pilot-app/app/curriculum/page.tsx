@@ -132,7 +132,7 @@ export default function CurriculumPage(){
    setMessage('Черновик урока создан и связан с темой КТП.');setTick(x=>x+1);
   }catch(e){setError(e instanceof Error?e.message:'Ошибка создания урока')}finally{setBusy(false)}
  }
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">4.1 · КТП → урок → задание</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/overview">Панель 4.0</Link><Link href="/assignments">Задания</Link></nav></div></header>
+ return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">4.1 · КТП → урок → задание</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/overview">Панель 4.0</Link><Link href="/assignments">Задания</Link><Link href="/results">Результаты</Link></nav></div></header>
  <main className="container"><h1>Связанные учебные материалы</h1><p className="muted">Каждая тема получает постоянный идентификатор в базе. Уроки и задания могут ссылаться на него без поиска по названию.</p>
  <div className="warning"><b>Пилотная функция.</b> Не используйте реальные данные учащихся до завершения проверки безопасности. КТП должен быть загружен педагогом в серверный редактор; синхронизация требует новой миграции SQL.</div>
  {!ready&&<p>Проверка доступа…</p>}
