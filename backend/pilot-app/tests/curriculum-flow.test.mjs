@@ -61,3 +61,12 @@ test('KSP editor can attach to a curriculum topic without auto changing existing
  assert.match(editor,/curriculum_topic_id:curriculumTopicId/);
  assert.match(editor,/disabled=\{!!selected\}/);
 });
+
+test('curriculum view includes linked KSP and legacy learning objectives',()=>{
+ const form=read('components/MaterialForm.tsx');
+ assert.match(curriculum,/\.from\('ksp_documents'\)/);
+ assert.match(curriculum,/linkedKsp/);
+ assert.match(curriculum,/row\.objectives/);
+ assert.match(form,/\['goals','Цели обучения/);
+ assert.match(form,/row\.goals\?\?row\.objectives/);
+});
