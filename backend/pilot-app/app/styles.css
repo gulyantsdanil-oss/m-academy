@@ -7,3 +7,7 @@
 .stat4 span{color:#61718e;font-size:12px;line-height:1.5}
 @media(max-width:900px){.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.stat-grid{grid-template-columns:1fr}}
+
+/* Lesson editor fields */
+textarea{font:inherit;border:1px solid #cbd8eb;padding:11px;border-radius:10px;background:#fff;color:#12213c;width:100%;min-height:95px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #24b6ae;outline-offset:2px}
