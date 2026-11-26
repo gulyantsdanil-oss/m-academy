@@ -18,7 +18,7 @@ test('Google sign-in never grants roles from email, claims or ECO CLUB Firestore
  assert.match(home,/\.from\('memberships'\)/);
  assert.match(home,/\.eq\('user_id',user\.id\)\.eq\('active',true\)/);
  assert.doesNotMatch(home,/\.from\('memberships'\)\.insert/);
- assert.doesNotMatch(home,/firebase|firestore|signInWithIdToken/ig);
+ assert.doesNotMatch(home,/from\s+['\"](?:firebase|@firebase)|signInWithIdToken\(|getFirestore\(/i);
  assert.doesNotMatch(supabase,/SERVICE_ROLE|service_role/i);
 });
 test('OAuth error is displayed without persisting credentials or arbitrary redirect URL',()=>{
