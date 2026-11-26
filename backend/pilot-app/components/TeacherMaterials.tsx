@@ -5,7 +5,8 @@ import type {ClassRoom,TeacherAssignment} from '@/lib/types';
 import {MaterialForm} from '@/components/MaterialForm';
 
 type Kind='ksp'|'ktp';
-type Material={id:string;school_id:string;class_id:string;teacher_id:string;revision:number;updated_at:string;content:Record<string,unknown>;topic?:string;subject?:string};
+type Material={id:string;school_id:string;class_id:string;teacher_id:string;revision:number;updated_at:string;content:Record<string,unknown>;topic?:string;subject?:string;curriculum_topic_id?:string|null};
+type CurriculumTopic={id:string;topic:string;position:number};
 type BackupRow={kind:Kind;title:string;data:Record<string,unknown>};
 const MAX_BYTES=500000;
 const tableFor=(kind:Kind)=>kind==='ksp'?'ksp_documents':'curriculum_plans';
@@ -78,6 +79,8 @@ export function TeacherMaterials({
  const currentClass=permitted.some(c=>c.id===classId)?classId:permitted[0]?.id||'';
  const [kind,setKind]=useState<Kind>('ksp');
  const [docs,setDocs]=useState<Material[]>([]);
+ const [curriculumTopics,setCurriculumTopics]=useState<CurriculumTopic[]>([]);
+ const [curriculumTopicId,setCurriculumTopicId]=useState('');
  const [selected,setSelected]=useState<string>('');
  const [title,setTitle]=useState('');
  const [editor,setEditor]=useState(stringify(defaultKsp()));
@@ -93,7 +96,7 @@ export function TeacherMaterials({
  const fetchDocuments=useCallback(async()=>{
   if(!api||!currentClass){setDocs([]);return}
   const {data,error:loadError}=await api.from(tableFor(kind))
-    .select('id,school_id,class_id,teacher_id,revision,updated_at,content,'+(kind==='ksp'?'topic':'subject'))
+    .select('id,school_id,class_id,teacher_id,revision,updated_at,content,'+(kind==='ksp'?'topic,curriculum_topic_id':'subject'))
     .eq('school_id',schoolId).eq('class_id',currentClass).eq('teacher_id',teacherId)
     .order('updated_at',{ascending:false}).limit(100);
   if(loadError){setError(loadError.message);return}
@@ -101,16 +104,28 @@ export function TeacherMaterials({
  },[api,currentClass,kind,schoolId,teacherId]);
 
  useEffect(()=>{void fetchDocuments()},[fetchDocuments]);
+ useEffect(()=>{
+  if(!api||!currentClass||kind!=='ksp'){setCurriculumTopics([]);return}
+  let alive=true;
+  (async()=>{
+   const {data,error:loadError}=await api.from('curriculum_topics').select('id,topic,position')
+    .eq('school_id',schoolId).eq('class_id',currentClass).eq('teacher_id',teacherId).order('position').limit(1000);
+   if(!alive)return;
+   if(loadError){setCurriculumTopics([]);return}
+   setCurriculumTopics((data||[]) as CurriculumTopic[]);
+  })();
+  return()=>{alive=false};
+ },[api,currentClass,kind,schoolId,teacherId]);
 
  function clearEditor(nextKind=kind){
-  setSelected('');setRevision(null);setTitle('');
+  setSelected('');setRevision(null);setTitle('');setCurriculumTopicId('');
   setEditor(stringify(nextKind==='ksp'?defaultKsp():defaultKtp()));
   setError('');setMessage('');
  }
  function pick(id:string){
   if(!id){clearEditor();return}
   const doc=docs.find(d=>d.id===id);if(!doc)return;
-  setSelected(doc.id);setRevision(doc.revision);
+  setSelected(doc.id);setRevision(doc.revision);setCurriculumTopicId(doc.curriculum_topic_id||'');
   setTitle(String(kind==='ksp'?doc.topic||'':doc.subject||''));
   setEditor(stringify(doc.content));setError('');setMessage('');
  }
@@ -131,7 +146,7 @@ export function TeacherMaterials({
   try{
    if(!selected){
     const base={school_id:schoolId,class_id:currentClass,teacher_id:teacherId,
-     content:parsed,...(kind==='ksp'?{topic:trimmed}:{subject:trimmed})};
+     content:parsed,...(kind==='ksp'?{topic:trimmed,...(curriculumTopicId?{curriculum_topic_id:curriculumTopicId}:{})}:{subject:trimmed})};
     const {data,error:insertError}=await api.from(tableFor(kind)).insert(base)
       .select('id,revision').single();
     if(insertError||!data)throw new Error(insertError?.message||'Ошибка записи');
@@ -194,6 +209,17 @@ export function TeacherMaterials({
     {docs.map(d=><option key={d.id} value={d.id}>{kind==='ksp'?d.topic:d.subject} · редакция {d.revision}</option>)}
    </select>
    <form onSubmit={e=>void save(e)}>
+    {kind==='ksp'&&<><label htmlFor="matCurriculum">Связь с темой КТП</label>
+    <select id="matCurriculum" value={curriculumTopicId} disabled={!!selected} onChange={e=>{
+     const id=e.target.value;setCurriculumTopicId(id);
+     const topic=curriculumTopics.find(t=>t.id===id);
+     if(topic)setTitle(topic.topic);
+    }}>
+     <option value="">Без привязки к КТП</option>
+     {curriculumTopics.map(t=><option value={t.id} key={t.id}>№{t.position} · {t.topic}</option>)}
+    </select>
+    <p className="muted">Связь выбирается при создании КСП. После сохранения изменить её напрямую нельзя; содержание обновляется по редакциям.</p>
+   </>}
     <label htmlFor="matTitle">{kind==='ksp'?'Тема КСП':'Предмет КТП'}</label>
     <input id="matTitle" required maxLength={300} value={title} onChange={e=>setTitle(e.target.value)}/>
     {visualValue?<MaterialForm kind={kind} value={visualValue} onChange={next=>setEditor(stringify(next))}/>:<p className="warning">Невозможно показать визуальную форму: структура JSON некорректна. Исправьте её ниже.</p>}
