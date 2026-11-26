@@ -102,13 +102,13 @@ export default function CurriculumPage(){
  async function synchronize(){
   if(!api||!uid||!selectedPlan||busy||candidates.error||!candidates.rows.length)return;
   if(hasLinks&&!matches){setError('В этом КТП уже существуют связанные уроки или задания. Изменение структуры тем заблокировано во избежание потери связей. Создайте новую редакцию КТП отдельно.');return}
+  if(currentTopics.some(t=>t.position>candidates.rows.length)){setError('Число тем уменьшилось. Сначала согласуйте структуру КТП; автоматическое удаление существующих строк запрещено.');return}
   if(!window.confirm('Согласовать '+candidates.rows.length+' тем КТП с серверным реестром?'))return;
   setBusy(true);setError('');setMessage('');
   try{
    // Existing positions are updated in place (preserving IDs and foreign-key links).
    // Removing linked topics is deliberately not automated.
    const original=new Map(currentTopics.map(t=>[t.position,t]));
-   const incoming=new Set(candidates.rows.map(r=>r.position));
    for(const row of candidates.rows){
     const old=original.get(row.position);
     if(old){
@@ -120,8 +120,7 @@ export default function CurriculumPage(){
      if(res.error)throw new Error(res.error.message);
     }
    }
-   const removed=currentTopics.filter(t=>!incoming.has(t.position));
-   if(removed.length)throw Error('Текущий КТП стал короче. Автоматическое удаление тем запрещено; существующие темы оставлены без изменений.');
+
    setMessage('Реестр тем синхронизирован с КТП.');setTick(x=>x+1);
   }catch(err){setError('Часть записей могла быть сохранена. Обновите страницу и проверьте совпадения. '+(err instanceof Error?err.message:'Ошибка сохранения'))}
   finally{setBusy(false)}
