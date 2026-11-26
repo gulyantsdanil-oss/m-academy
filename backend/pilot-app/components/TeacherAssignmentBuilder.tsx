@@ -80,7 +80,7 @@ export function TeacherAssignmentBuilder({
    setTopic('');setTopicId('');setQuestions(initial());onSaved();
   }catch(err){
    setError((err instanceof Error?err.message:'Неизвестная ошибка')+
-    ' Проверьте применение миграции 20261126_atomic_assignment_publish.sql.');
+    ' Проверьте применение миграции 20261126120000_atomic_assignment_publish.sql.');
   }finally{setBusy(false)}
  }
  if(!options.length)return <section className="card"><h2>Создание задания</h2><p className="muted">Для начала администратор должен назначить учителя на класс и предмет.</p></section>;
