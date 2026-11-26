@@ -51,6 +51,27 @@ jobs:
             exit 1
           fi
 
+  container-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Build standalone Next.js image with disposable public test credentials
+        run: |
+          docker build --file backend/pilot-app/Dockerfile \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL=https://test-project.supabase.co \
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_disposableci \
+            --tag m-academy-pilot:ci backend/pilot-app
+      - name: Run non-root container and test HTTP routes
+        run: |
+          set -euo pipefail
+          docker run -d --name m-academy-pilot-ci -p 3118:3000 m-academy-pilot:ci
+          trap 'docker rm -f m-academy-pilot-ci >/dev/null 2>&1 || true' EXIT
+          node backend/pilot-app/scripts/http-smoke.mjs http://127.0.0.1:3118
+          test "$(docker exec m-academy-pilot-ci id -u)" = 1001
+
+
   postgres-migration-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 15
