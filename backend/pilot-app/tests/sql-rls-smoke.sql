@@ -67,4 +67,68 @@ begin
  end if;
 end
 $$;
+
+-- Students may submit their own published assignment exactly once.
+set local request.jwt.claim.sub='22222222-2222-4222-8222-222222222222';
+do $$
+declare
+ v_assignment uuid;
+ v_question uuid;
+ v_submission uuid;
+ v_duplicate_blocked boolean:=false;
+ v_write_blocked boolean:=false;
+begin
+ select id into v_assignment from public.assignments where published limit 1;
+ select id into v_question from public.assignment_questions where assignment_id=v_assignment;
+ v_submission:=public.submit_assignment_answers(v_assignment,jsonb_build_object(v_question::text,'14'));
+ if v_submission is null then raise exception 'Submission was not created'; end if;
+ if (select count(*) from public.submissions where id=v_submission)<>1 then
+  raise exception 'Student cannot read own submission';
+ end if;
+ if (select count(*) from public.submission_answers where submission_id=v_submission)<>1 then
+  raise exception 'Student answer not persisted';
+ end if;
+ begin
+  perform public.submit_assignment_answers(v_assignment,jsonb_build_object(v_question::text,'15'));
+ exception when unique_violation then v_duplicate_blocked:=true;
+ end;
+ if not v_duplicate_blocked then raise exception 'Duplicate student submission was accepted'; end if;
+ begin
+  update public.assignment_keys set answer_text='999' where question_id=v_question;
+ exception when insufficient_privilege then v_write_blocked:=true;
+ end;
+ if not v_write_blocked then raise exception 'Student could modify answer keys'; end if;
+end
+$$;
+
+-- Unassigned users cannot read assignments, self-provision membership or publish.
+reset request.jwt.claim.sub;
+insert into auth.users(id) values ('33333333-3333-4333-8333-333333333333');
+set local request.jwt.claim.sub='33333333-3333-4333-8333-333333333333';
+do $$
+declare
+ v_blocked boolean:=false;
+ v_assignment uuid;
+ v_topic uuid;
+begin
+ if (select count(*) from public.classes)<>0 then raise exception 'Unassigned user read classes'; end if;
+ if (select count(*) from public.assignments)<>0 then raise exception 'Unassigned user read assignments'; end if;
+ begin
+  insert into public.memberships(school_id,user_id,role)
+   values ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',auth.uid(),'admin');
+ exception when insufficient_privilege then v_blocked:=true;
+ end;
+ if not v_blocked then raise exception 'User provisioned admin membership'; end if;
+ v_blocked:=false;
+ begin
+  perform public.publish_teacher_assignment(
+   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+   'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+   'Unauthorized', '[{"question":"1+1?","answer":"2","level":"A"}]'::jsonb,null);
+ exception when others then v_blocked:=true;
+ end;
+ if not v_blocked then raise exception 'Unassigned user published assignment'; end if;
+end
+$$;
+
 rollback;
