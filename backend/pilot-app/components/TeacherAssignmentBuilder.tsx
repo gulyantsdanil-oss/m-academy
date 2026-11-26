@@ -67,42 +67,25 @@ export function TeacherAssignmentBuilder({
    setError('Заполните все вопросы и ответы; проверьте допустимую длину.');return
   }
   setBusy(true);
-  let draftId:string|null=null;
   try{
-   const inserted=await sb.from('assignments').insert({
-    school_id:schoolId,class_id:chosen,teacher_id:teacherId,topic:topic.trim(),published:false,...(topicId?{curriculum_topic_id:topicId}:{})
-   }).select('id').single();
-   if(inserted.error||!inserted.data)throw new Error(inserted.error?.message||'Не удалось создать черновик');
-   draftId=inserted.data.id as string;
-   const rows=questions.map((x,i)=>({
-    school_id:schoolId,assignment_id:draftId,position:i+1,
-    question_text:x.question.trim(),level:x.level
-   }));
-   const savedQuestions=await sb.from('assignment_questions').insert(rows).select('id,position');
-   if(savedQuestions.error||!savedQuestions.data||savedQuestions.data.length!==questions.length){
-    throw new Error(savedQuestions.error?.message||'Не удалось сохранить вопросы');
-   }
-   const keys=savedQuestions.data.map(x=>({
-    school_id:schoolId,question_id:x.id as string,
-    answer_text:questions[Number(x.position)-1].answer.trim()
-   }));
-   const savedKeys=await sb.from('assignment_keys').insert(keys);
-   if(savedKeys.error)throw new Error(savedKeys.error.message);
-   const publish=await sb.from('assignments').update({published:true}).eq('id',draftId);
-   if(publish.error)throw new Error(publish.error.message);
-   setMessage('Задание опубликовано. Ученики назначенного класса могут открыть его после входа.');
-   setTopic('');setQuestions(initial());onSaved();
+   // Server performs questions, restricted keys and publication in one transaction.
+   // This avoids partial published assignments if any insert fails.
+   const {data,error:publishError}=await sb.rpc('publish_teacher_assignment',{
+    p_school:schoolId,p_class:chosen,p_topic:topic.trim(),
+    p_questions:questions.map(q=>({question:q.question.trim(),answer:q.answer.trim(),level:q.level})),
+    p_curriculum_topic:topicId||null
+   });
+   if(publishError||!data)throw new Error(publishError?.message||'Сервер не подтвердил публикацию.');
+   setMessage('Задание опубликовано одной транзакцией. Номер: '+String(data).slice(0,8)+'…');
+   setTopic('');setTopicId('');setQuestions(initial());onSaved();
   }catch(err){
-   if(draftId){
-    const rollback=await sb.from('assignments').delete().eq('id',draftId);
-    setError((err instanceof Error?err.message:'Неизвестная ошибка')+
-      (rollback.error?' Черновик остался в базе: '+rollback.error.message:' Изменения задания отменены.'));
-   }else setError(err instanceof Error?err.message:'Неизвестная ошибка');
+   setError((err instanceof Error?err.message:'Неизвестная ошибка')+
+    ' Проверьте применение миграции 20261126_atomic_assignment_publish.sql.');
   }finally{setBusy(false)}
  }
  if(!options.length)return <section className="card"><h2>Создание задания</h2><p className="muted">Для начала администратор должен назначить учителя на класс и предмет.</p></section>;
  return <section className="card"><h2>Создать задание для класса</h2>
- <p className="muted">В этом прототипе учитель вручную задаёт вопросы и отдельные правильные ответы. После сохранения ключи остаются в закрытой таблице.</p>
+ <p className="muted">Учитель составляет вопросы и ключи. Публикация происходит атомарно на сервере, а ключи остаются в отдельной закрытой таблице.</p>
  <div className="actions"><button className="btn" type="button" disabled={busy} onClick={()=>{setTopic("Арифметическая прогрессия");setQuestions(arithmeticSample.map(q=>({...q})));setMessage("Пример загружен. Проверьте задания и ответы перед публикацией.");setError("");}}>Заполнить пример по арифметической прогрессии</button></div>
  <form onSubmit={e=>void create(e)}>
  <label htmlFor="assignmentClass">Мой класс</label>
