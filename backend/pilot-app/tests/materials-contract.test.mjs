@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const migrations=new URL('../../supabase/migrations/',import.meta.url);
-const sql=readFileSync(new URL('20261123_teacher_materials.sql',migrations),'utf8');
+const sql=readFileSync(new URL('20261123110000_teacher_materials.sql',migrations),'utf8');
 const teacher=readFileSync(new URL('../components/TeacherMaterials.tsx',import.meta.url),'utf8');
 const app=readFileSync(new URL('../app/page.tsx',import.meta.url),'utf8');
 test('Server storage limits document size and requires object data',()=>{
