@@ -1,9 +1,10 @@
 'use client';
-import {useState,type FormEvent} from 'react';
+import {useEffect,useState,type FormEvent} from 'react';
 import {getSupabase} from '@/lib/supabase';
 import type {ClassRoom,TeacherAssignment} from '@/lib/types';
 
 type Question={question:string;answer:string;level:'A'|'B'|'C'};
+type CurriculumTopic={id:string;class_id:string;topic:string;position:number;plan_id:string};
 const arithmeticSample:Question[]=[
  {question:"Найдите пятый член арифметической прогрессии, если a₁ = 2, d = 3.",answer:"14",level:"A"},
  {question:"Найдите десятый член арифметической прогрессии, если a₃ = 11, d = 4.",answer:"39",level:"B"},
@@ -23,6 +24,9 @@ export function TeacherAssignmentBuilder({
 }){
  const [classId,setClassId]=useState('');
  const [topic,setTopic]=useState('');
+ const [curriculumTopics,setCurriculumTopics]=useState<CurriculumTopic[]>([]);
+ const [topicId,setTopicId]=useState('');
+ const [curriculumError,setCurriculumError]=useState('');
  const [questions,setQuestions]=useState<Question[]>(initial);
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState('');
@@ -30,6 +34,23 @@ export function TeacherAssignmentBuilder({
  const permitted=new Set(assignments.map(x=>x.class_id));
  const options=classes.filter(x=>permitted.has(x.id));
  const chosen=options.some(x=>x.id===classId)?classId:options[0]?.id||'';
+ useEffect(()=>{
+  const sb=getSupabase();
+  if(!sb||!chosen){setCurriculumTopics([]);setTopicId('');return}
+  let live=true;
+  (async()=>{
+   const {data,error}=await sb.from('curriculum_topics').select('id,class_id,topic,position,plan_id')
+    .eq('school_id',schoolId).eq('class_id',chosen).eq('teacher_id',teacherId).order('position').limit(1000);
+   if(!live)return;
+   if(error){setCurriculumError('Темы КТП не загружены: '+error.message);setCurriculumTopics([]);return}
+   setCurriculumError('');
+   const rows=(data||[]) as CurriculumTopic[];
+   setCurriculumTopics(rows);
+   setTopicId(prev=>rows.some(t=>t.id===prev)?prev:'');
+  })();
+  return()=>{live=false};
+ },[chosen,schoolId,teacherId]);
+
 
  function update(index:number,field:keyof Question,value:string){
   setQuestions(q=>q.map((item,i)=>i===index?{...item,[field]:value}:item))
@@ -49,7 +70,7 @@ export function TeacherAssignmentBuilder({
   let draftId:string|null=null;
   try{
    const inserted=await sb.from('assignments').insert({
-    school_id:schoolId,class_id:chosen,teacher_id:teacherId,topic:topic.trim(),published:false
+    school_id:schoolId,class_id:chosen,teacher_id:teacherId,topic:topic.trim(),published:false,...(topicId?{curriculum_topic_id:topicId}:{})
    }).select('id').single();
    if(inserted.error||!inserted.data)throw new Error(inserted.error?.message||'Не удалось создать черновик');
    draftId=inserted.data.id as string;
@@ -88,6 +109,16 @@ export function TeacherAssignmentBuilder({
  <select id="assignmentClass" value={chosen} onChange={e=>setClassId(e.target.value)}>
  {options.map(x=><option value={x.id} key={x.id}>{x.label} · {x.academic_year}</option>)}
  </select>
+ <label htmlFor="assignmentCurriculumTopic">Связать с КТП (необязательно)</label>
+ <select id="assignmentCurriculumTopic" value={topicId} onChange={e=>{
+  const next=e.target.value;setTopicId(next);
+  const found=curriculumTopics.find(t=>t.id===next);
+  if(found)setTopic(found.topic);
+ }}>
+  <option value="">Без связи с КТП</option>
+  {curriculumTopics.map(t=><option key={t.id} value={t.id}>№{t.position} · {t.topic}</option>)}
+ </select>
+ {curriculumError&&<p className="warning">{curriculumError} Связать задание с КТП можно после применения миграции.</p>}
  <label htmlFor="assignmentTopic">Тема</label><input id="assignmentTopic" value={topic} onChange={e=>setTopic(e.target.value)} maxLength={300} required placeholder="Арифметическая прогрессия"/>
  {questions.map((q,i)=><div className="card" style={{boxShadow:'none'}} key={i}>
  <b>Задание {i+1}</b><label htmlFor={'q'+i}>Условие</label>
