@@ -1,3 +1,14 @@
+## Переносимая Docker-сборка — 26 ноября 2026
+
+- `backend/pilot-app/next.config.mjs`: включён `output: 'standalone'` для компактного серверного размещения.
+- `backend/pilot-app/Dockerfile`: многостадийная сборка Node.js 22; итоговый контейнер запускается от пользователя UID 1001 без root.
+- `backend/pilot-app/.dockerignore`: исключены локальные env-файлы, зависимости и сборочные артефакты.
+- `.github/workflows/pilot-ci.yml`: отдельная задача `container-smoke` собирает Docker-образ с фиктивными **публичными** параметрами Supabase, запускает его, проверяет API здоровья и HTTP-ответы ключевых страниц, затем подтверждает непривилегированного пользователя контейнера.
+- [GitHub Actions: успешны три задачи](https://github.com/gulyantsdanil-oss/m-academy/actions/runs/45808067277): `pilot-validation`, `container-smoke`, `postgres-migration-smoke`.
+- [Инструкция по развёртыванию и Docker](DEPLOYMENT-PILOT.md).
+
+**Граница подтверждения:** контейнер действительно запускается в GitHub Actions, но постоянный сервер и реальная Supabase ещё не подключены. Параметры `NEXT_PUBLIC_*` подставляются **при сборке**, поэтому смена тестового Supabase требует пересборки образа. Эта проверка не означает завершённое размещение или работающий Google OAuth.
+
 ## HTTP-проверка серверного пилота — 26 ноября 2026
 
 - В `backend/pilot-app/app/api/health/route.ts` добавлен минимальный HTTP liveness без секретов или сведений о пользователях. Проверяется только, что процесс Next.js отвечает; это **не** readiness Supabase.
