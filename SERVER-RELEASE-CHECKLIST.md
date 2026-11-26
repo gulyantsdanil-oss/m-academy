@@ -1,3 +1,11 @@
+## Проверка конфигурации OAuth перед развёртыванием — 26 ноября 2026
+
+- Добавлена автономная команда `cd backend/pilot-app && npm run auth:preflight` и библиотека `scripts/oauth-preflight-lib.mjs`. При наличии `PILOT_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` проверяются HTTPS, отсутствие пути или параметров в origin, отсутствие GitHub Pages в качестве серверного адреса и запрет service-role JWT/`sb_secret_*` в публичной переменной.
+- Команда вычисляет соответствующие Google redirect URI (`/auth/v1/callback` у Supabase) и M-academy Site URL, не делает сетевых запросов, не выводит ключи и не использует настройки Firebase ECO CLUB.
+- Автономная проверка **не подтверждает**, что включён Google Provider, создан OAuth Client, правильно заполнен consent screen, сайт развёрнут или пользователь получил доступ.
+- В `tests/oauth-preflight.test.mjs` добавлены негативные тесты неверных origin, GitHub Pages, секретных ключей и отсутствия утечки публичного ключа в диагностике.
+- [Успешный GitHub Actions запуск: сборка, тесты, PostgreSQL и восстановление](https://github.com/gulyantsdanil-oss/m-academy/actions/runs/45805268664).
+
 ## Диагностика Google-входа и ролей — 26 ноября 2026
 
 - Создан тестовый экран `/auth-check` в `backend/pilot-app/app/auth-check/page.tsx`, доступный из кабинета и справки.
