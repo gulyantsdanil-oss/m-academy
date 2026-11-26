@@ -37,3 +37,41 @@ jobs:
         env:
           NEXT_TELEMETRY_DISABLED: '1'
         run: npm run build
+
+  postgres-migration-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: academy_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d academy_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGDATABASE: academy_ci
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+      - name: Prepare minimal auth schema (CI only)
+        run: psql -v ON_ERROR_STOP=1 -f backend/pilot-app/tests/sql-auth-ci-bootstrap.sql
+      - name: Apply ordered migrations to actual PostgreSQL
+        run: |
+          set -euo pipefail
+          for migration in backend/supabase/migrations/*.sql; do
+            echo "Applying $migration"
+            psql -v ON_ERROR_STOP=1 -f "$migration"
+          done
