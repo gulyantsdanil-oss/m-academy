@@ -107,7 +107,7 @@ $$;
 
 -- Grade a submitted work as the assigned teacher, then verify student read access.
 set local request.jwt.claim.sub='11111111-1111-4111-8111-111111111111';
-do $
+do $grade_teacher$
 declare
  v_submission uuid;
 begin
@@ -119,7 +119,7 @@ begin
   raise exception 'Teacher cannot read assigned grade';
  end if;
 end
-$;
+$grade_teacher$;
 set local request.jwt.claim.sub='22222222-2222-4222-8222-222222222222';
 do $
 declare
@@ -139,7 +139,7 @@ begin
  end;
  if not v_blocked then raise exception 'Student changed teacher grade'; end if;
 end
-$;
+$grade_student$;
 
 -- Unassigned users cannot read assignments, self-provision membership or publish.
 set local request.jwt.claim.sub='33333333-3333-4333-8333-333333333333';
