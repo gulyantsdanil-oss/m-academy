@@ -75,3 +75,5 @@ jobs:
             echo "Applying $migration"
             psql -v ON_ERROR_STOP=1 -f "$migration"
           done
+      - name: Verify role isolation with synthetic teacher and student
+        run: psql -v ON_ERROR_STOP=1 -f backend/pilot-app/tests/sql-rls-smoke.sql
