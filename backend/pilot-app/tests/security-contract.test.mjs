@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const base=new URL('../../supabase/migrations/',import.meta.url);
-const initial=readFileSync(new URL('20261123_initial.sql',base),'utf8');
-const submissions=readFileSync(new URL('20261123_atomic_submissions.sql',base),'utf8');
+const initial=readFileSync(new URL('20261123090000_initial.sql',base),'utf8');
+const submissions=readFileSync(new URL('20261123100000_atomic_submissions.sql',base),'utf8');
 const policy=(name)=>new RegExp('create\\s+policy\\s+'+name+'\\s+on\\s+public\\.','i');
 
 test('All sensitive tables have row level security enabled',()=>{
