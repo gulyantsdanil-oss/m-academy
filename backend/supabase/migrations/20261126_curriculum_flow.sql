@@ -40,6 +40,8 @@ alter table public.lesson_drafts
  add column if not exists curriculum_topic_id uuid;
 alter table public.assignments
  add column if not exists curriculum_topic_id uuid;
+alter table public.ksp_documents
+ add column if not exists curriculum_topic_id uuid;
 
 alter table public.lesson_drafts
  add constraint lesson_drafts_curriculum_topic_fk
@@ -49,9 +51,14 @@ alter table public.assignments
  add constraint assignments_curriculum_topic_fk
  foreign key(curriculum_topic_id,school_id,class_id,teacher_id)
  references public.curriculum_topics(id,school_id,class_id,teacher_id);
+alter table public.ksp_documents
+ add constraint ksp_documents_curriculum_topic_fk
+ foreign key(curriculum_topic_id,school_id,class_id,teacher_id)
+ references public.curriculum_topics(id,school_id,class_id,teacher_id);
 
 create index if not exists lesson_drafts_curriculum_idx on public.lesson_drafts(curriculum_topic_id);
 create index if not exists assignments_curriculum_idx on public.assignments(curriculum_topic_id);
+create index if not exists ksp_curriculum_idx on public.ksp_documents(curriculum_topic_id);
 
 alter table public.curriculum_topics enable row level security;
 drop policy if exists topics_teacher_select on public.curriculum_topics;
@@ -82,6 +89,6 @@ grant delete on public.curriculum_topics to authenticated;
 
 -- Linking an assignment to a topic is possible only for its assigned teacher;
 -- the composite FK disallows linking another class or another teacher's topic.
-grant update(curriculum_topic_id) on public.lesson_drafts,public.assignments to authenticated;
+grant update(curriculum_topic_id) on public.lesson_drafts,public.assignments,public.ksp_documents to authenticated;
 
 commit;
