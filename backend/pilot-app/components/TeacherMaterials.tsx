@@ -95,12 +95,21 @@ export function TeacherMaterials({
 
  const fetchDocuments=useCallback(async()=>{
   if(!api||!currentClass){setDocs([]);return}
-  const {data,error:loadError}=await api.from(tableFor(kind))
-    .select('id,school_id,class_id,teacher_id,revision,updated_at,content,'+(kind==='ksp'?'topic,curriculum_topic_id':'subject'))
+  if(kind==='ksp'){
+   const {data,error:loadError}=await api.from('ksp_documents')
+    .select('id,school_id,class_id,teacher_id,revision,updated_at,content,topic,curriculum_topic_id')
     .eq('school_id',schoolId).eq('class_id',currentClass).eq('teacher_id',teacherId)
     .order('updated_at',{ascending:false}).limit(100);
-  if(loadError){setError(loadError.message);return}
-  setDocs((data||[]) as Material[]);
+   if(loadError){setError(loadError.message);return}
+   setDocs((data||[]) as Material[]);
+  }else{
+   const {data,error:loadError}=await api.from('curriculum_plans')
+    .select('id,school_id,class_id,teacher_id,revision,updated_at,content,subject')
+    .eq('school_id',schoolId).eq('class_id',currentClass).eq('teacher_id',teacherId)
+    .order('updated_at',{ascending:false}).limit(100);
+   if(loadError){setError(loadError.message);return}
+   setDocs((data||[]) as Material[]);
+  }
  },[api,currentClass,kind,schoolId,teacherId]);
 
  useEffect(()=>{void fetchDocuments()},[fetchDocuments]);
@@ -145,10 +154,11 @@ export function TeacherMaterials({
   setBusy(true);
   try{
    if(!selected){
-    const base={school_id:schoolId,class_id:currentClass,teacher_id:teacherId,
-     content:parsed,...(kind==='ksp'?{topic:trimmed,...(curriculumTopicId?{curriculum_topic_id:curriculumTopicId}:{})}:{subject:trimmed})};
-    const {data,error:insertError}=await api.from(tableFor(kind)).insert(base)
-      .select('id,revision').single();
+    const base={school_id:schoolId,class_id:currentClass,teacher_id:teacherId,content:parsed};
+    const saved=kind==='ksp'
+     ?await api.from('ksp_documents').insert({...base,topic:trimmed,...(curriculumTopicId?{curriculum_topic_id:curriculumTopicId}:{})}).select('id,revision').single()
+     :await api.from('curriculum_plans').insert({...base,subject:trimmed}).select('id,revision').single();
+    const {data,error:insertError}=saved;
     if(insertError||!data)throw new Error(insertError?.message||'Ошибка записи');
     setSelected(String(data.id));setRevision(Number(data.revision));
     setMessage('Создана серверная версия №1.');await fetchDocuments();
