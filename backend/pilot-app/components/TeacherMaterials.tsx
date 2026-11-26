@@ -30,7 +30,7 @@ function archiveEntries(value:unknown):BackupRow[]{
   if(value.topics.length>1000||value.assignments.length>2000)throw Error('Архив 3.1 превышает допустимые лимиты.');
   const mapped=value.topics.map((v:unknown)=>{
    if(!jsonObject(v)||typeof v.topic!=='string'||v.topic.trim().length<2||v.topic.length>250||
-     !Number.isInteger(v.hours)||Number(v.hours)<1||Number(v.hours)>50||
+     typeof v.hours!=='number'||!Number.isInteger(v.hours)||v.hours<1||v.hours>50||
      typeof v.grade!=='string'||!/^(?:[5-9]|10|11)$/.test(v.grade)||
      typeof v.subject!=='string'||v.subject.length>90||
      typeof v.group!=='string'||v.group.length>12||
