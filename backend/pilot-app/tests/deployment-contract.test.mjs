@@ -26,3 +26,18 @@ test('undeployed school pilot has protective HTTP headers',()=>{
  assert.match(config,/X-Robots-Tag/);
  assert.match(config,/noindex, nofollow/);
 });
+
+test('standalone Docker runtime is non-root and excludes private .env files',()=>{
+ const docker=readFileSync(new URL('../Dockerfile',import.meta.url),'utf8');
+ const ignore=readFileSync(new URL('../.dockerignore',import.meta.url),'utf8');
+ const next=readFileSync(new URL('../next.config.mjs',import.meta.url),'utf8');
+ assert.match(next,/output:'standalone'/);
+ assert.match(docker,/FROM node:22-bookworm-slim AS runner/);
+ assert.match(docker,/USER nextjs/);
+ assert.match(docker,/COPY --from=builder .*\/app\/\.next\/standalone/);
+ assert.match(ignore,/^\.env$/m);
+ assert.match(ignore,/^\.env\.\*$/m);
+ assert.match(ci,/container-smoke:/);
+ assert.match(ci,/docker exec m-academy-pilot-ci id -u/);
+ assert.doesNotMatch(docker,/SUPABASE_SERVICE_ROLE_KEY|sb_secret_/);
+});
