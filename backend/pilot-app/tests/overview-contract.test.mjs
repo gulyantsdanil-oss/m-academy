@@ -42,5 +42,6 @@ test('v3.1 KTP import remains preview-only until explicit teacher save',()=>{
  assert.match(src,/validMaterial\('ktp',data\)/);
  assert.match(src,/setEditor\(stringify\(chosen\.data\)\)/);
  assert.match(src,/setSelected\(''\)/);
- assert.match(src,/api\.from\(tableFor\(kind\)\)\.insert\(base\)/);
+ assert.match(src,/api\.from\('ksp_documents'\)\.insert/);
+ assert.match(src,/api\.from\('curriculum_plans'\)\.insert/);
 });
