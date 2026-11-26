@@ -85,7 +85,7 @@ export default function OverviewPage(){
  },[identity,active,reload]);
  const ownClasses=snapshot.classes;
  const countPublished=snapshot.assignments.filter(a=>a.published).length;
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">4.0 · Secure pilot</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/curriculum">КТП → уроки</Link><Link href="/classes">Классы</Link><Link href="/assignments">Задания</Link><Link href="/help">Помощь</Link></nav></div></header>
+ return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">4.0 · Secure pilot</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/curriculum">КТП → уроки</Link><Link href="/classes">Классы</Link><Link href="/assignments">Задания</Link><Link href="/results">Результаты</Link><Link href="/help">Помощь</Link></nav></div></header>
  <main className="container">
   <h1>Единая рабочая панель 4.0</h1><p className="muted">Классы, КТП, документы и задания из одной базы. Состав данных ограничивается действующей ролью и политиками доступа Supabase.</p>
   <div className="warning"><b>Не для реальных данных детей до проверки безопасности.</b> Серверный пилот требует развёртывания, проверки RLS, соответствия требованиям хранения данных и резервного копирования. Публичный GitHub Pages не подключён к этому серверу.</div>
