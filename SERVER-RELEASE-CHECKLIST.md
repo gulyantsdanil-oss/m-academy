@@ -1,3 +1,12 @@
+## Диагностика Google-входа и ролей — 26 ноября 2026
+
+- Создан тестовый экран `/auth-check` в `backend/pilot-app/app/auth-check/page.tsx`, доступный из кабинета и справки.
+- Экран считывает только действующую сессию `auth.getUser()`, активные `memberships`, доступную школу и число назначений в `class_teachers`, `class_students` или `classes` с соблюдением RLS.
+- Явно различает отсутствие подключения Supabase, выход из системы, аккаунт без роли и ошибку чтения данных. Не выдаёт права и не переносит данные из Firebase.
+- Добавлен контрактный тест `tests/auth-check-contract.test.mjs`.
+- [GitHub Actions: успешный прогон тестов, TypeScript, Next.js, PostgreSQL и восстановления](https://github.com/gulyantsdanil-oss/m-academy/actions/runs/45802988049).
+- **Ожидает финальной интеграции:** настоящий Google OAuth, ручной браузерный тест разных аккаунтов и роли, проверка соответствия ECO CLUB Firebase UID ↔ Supabase Auth UID в доверенной административной процедуре.
+
 ## Вход через Google ECO CLUB — подготовлено в коде
 
 - В главном серверном кабинете добавлен `signInWithOAuth({provider:'google'})`, а приглашённый email-вход оставлен как резервный вариант.
