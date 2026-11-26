@@ -71,11 +71,15 @@ export default function ResultsPage(){
     if(sr.error){setError(sr.error.message);setPending(false);return}
     sub=(sr.data||[]) as Submitted[];
     if(sub.length){
-     const gr=await api.from('submission_grades').select('submission_id,score,feedback')
-      .in('submission_id',sub.map(x=>x.id)).eq('school_id',schoolId).limit(1000);
-     if(!alive)return;
-     if(gr.error){setError(gr.error.message);setPending(false);return}
-     scores=(gr.data||[]) as Grade[];
+     // Batch IDs so large classes do not exceed URL limits in PostgREST.
+     for(let offset=0;offset<sub.length;offset+=60){
+      const ids=sub.slice(offset,offset+60).map(x=>x.id);
+      const gr=await api.from('submission_grades').select('submission_id,score,feedback')
+       .in('submission_id',ids).eq('school_id',schoolId);
+      if(!alive)return;
+      if(gr.error){setError(gr.error.message);setPending(false);return}
+      scores.push(...((gr.data||[]) as Grade[]));
+     }
     }
    }
    if(!alive)return;
