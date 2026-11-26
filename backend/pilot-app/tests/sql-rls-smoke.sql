@@ -77,6 +77,7 @@ declare
  v_submission uuid;
  v_duplicate_blocked boolean:=false;
  v_write_blocked boolean:=false;
+ v_affected integer:=0;
 begin
  select id into v_assignment from public.assignments where published limit 1;
  select id into v_question from public.assignment_questions where assignment_id=v_assignment;
@@ -95,6 +96,8 @@ begin
  if not v_duplicate_blocked then raise exception 'Duplicate student submission was accepted'; end if;
  begin
   update public.assignment_keys set answer_text='999' where question_id=v_question;
+  get diagnostics v_affected = row_count;
+  v_write_blocked:=v_affected=0;
  exception when insufficient_privilege then v_write_blocked:=true;
  end;
  if not v_write_blocked then raise exception 'Student could modify answer keys'; end if;
