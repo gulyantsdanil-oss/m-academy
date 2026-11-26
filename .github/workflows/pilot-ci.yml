@@ -37,6 +37,19 @@ jobs:
         env:
           NEXT_TELEMETRY_DISABLED: '1'
         run: npm run build
+      - name: Smoke test production Next.js server and routes
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: |
+          set -euo pipefail
+          PORT=3117 npm run start -- -p 3117 > /tmp/m-academy-pilot.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          if ! node scripts/http-smoke.mjs http://127.0.0.1:3117; then
+            echo "Server startup log (redacted environment not logged):"
+            tail -n 70 /tmp/m-academy-pilot.log
+            exit 1
+          fi
 
   postgres-migration-smoke:
     runs-on: ubuntu-latest
