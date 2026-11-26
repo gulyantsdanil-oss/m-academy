@@ -34,3 +34,15 @@ test('assignment creation accepts canonical curriculum topic FK',()=>{
  assert.match(builder,/\.eq\('teacher_id',teacherId\)/);
  assert.match(builder,/curriculum_topic_id:topicId/);
 });
+
+test('teacher assignment publication is one invoker-rights SQL transaction',()=>{
+ const publication=read('../supabase/migrations/20261126_atomic_assignment_publish.sql');
+ assert.match(publication,/function public\.publish_teacher_assignment/);
+ assert.match(publication,/security invoker/);
+ assert.match(publication,/app_private\.is_teacher_of\(p_class\)/);
+ assert.match(publication,/insert into public\.assignment_keys/);
+ assert.match(publication,/update public\.assignments set published=true/);
+ assert.match(publication,/grant execute on function public\.publish_teacher_assignment/);
+ assert.match(builder,/\.rpc\('publish_teacher_assignment'/);
+ assert.doesNotMatch(builder,/\.from\('assignment_keys'\)\.insert/);
+});
