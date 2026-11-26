@@ -3,7 +3,8 @@
 begin;
 insert into auth.users(id) values
  ('11111111-1111-4111-8111-111111111111'),
- ('22222222-2222-4222-8222-222222222222');
+ ('22222222-2222-4222-8222-222222222222'),
+ ('33333333-3333-4333-8333-333333333333');
 insert into public.schools(id,name) values
  ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','School A'),
  ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','School B');
@@ -105,8 +106,6 @@ end
 $$;
 
 -- Unassigned users cannot read assignments, self-provision membership or publish.
-reset request.jwt.claim.sub;
-insert into auth.users(id) values ('33333333-3333-4333-8333-333333333333');
 set local request.jwt.claim.sub='33333333-3333-4333-8333-333333333333';
 do $$
 declare
