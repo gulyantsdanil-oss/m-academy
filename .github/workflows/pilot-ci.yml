@@ -77,3 +77,12 @@ jobs:
           done
       - name: Verify role isolation with synthetic teacher and student
         run: psql -v ON_ERROR_STOP=1 -f backend/pilot-app/tests/sql-rls-smoke.sql
+      - name: Backup and restore test database
+        run: |
+          set -euo pipefail
+          pg_dump --format=custom --no-owner --file=/tmp/m-academy-ci.dump
+          createdb academy_restored
+          pg_restore --no-owner --exit-on-error --dbname=academy_restored /tmp/m-academy-ci.dump
+          psql -v ON_ERROR_STOP=1 -d academy_restored -c "SELECT count(*) FROM public.schools;"
+      - name: Verify recovered schema and RLS after restoration
+        run: psql -v ON_ERROR_STOP=1 -d academy_restored -f backend/pilot-app/tests/sql-rls-smoke.sql
