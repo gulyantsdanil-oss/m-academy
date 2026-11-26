@@ -7,6 +7,7 @@ import type {ClassRoom,Membership,TeacherAssignment} from '@/lib/types';
 type Plan={id:string;school_id:string;class_id:string;teacher_id:string;subject:string;content:unknown;revision:number};
 type Topic={id:string;school_id:string;class_id:string;teacher_id:string;plan_id:string;position:number;topic:string;hours:number;scheduled_on:string|null;goals:string};
 type Draft={id:string;curriculum_topic_id:string|null;topic:string};
+type Ksp={id:string;curriculum_topic_id:string|null;topic:string};
 type Assignment={id:string;curriculum_topic_id:string|null;topic:string;published:boolean};
 type Candidate={position:number;topic:string;hours:number;scheduled_on:string|null;goals:string};
 const api=getSupabase();
@@ -34,6 +35,7 @@ export default function CurriculumPage(){
  const [planId,setPlanId]=useState('');
  const [topics,setTopics]=useState<Topic[]>([]);
  const [drafts,setDrafts]=useState<Draft[]>([]);
+ const [ksp,setKsp]=useState<Ksp[]>([]);
  const [assignments,setAssignments]=useState<Assignment[]>([]);
  const [error,setError]=useState('');
  const [message,setMessage]=useState('');
@@ -51,7 +53,7 @@ export default function CurriculumPage(){
  const matches=currentTopics.length===candidates.rows.length&&currentTopics.every((t,i)=>{
   const r=candidates.rows[i];return t.position===r.position&&t.topic===r.topic&&t.hours===r.hours&&t.goals===r.goals&&(t.scheduled_on||null)===r.scheduled_on;
  });
- const hasLinks=currentTopics.some(t=>drafts.some(d=>d.curriculum_topic_id===t.id)||assignments.some(a=>a.curriculum_topic_id===t.id));
+ const hasLinks=currentTopics.some(t=>drafts.some(d=>d.curriculum_topic_id===t.id)||ksp.some(d=>d.curriculum_topic_id===t.id)||assignments.some(a=>a.curriculum_topic_id===t.id));
  const loadIdentity=useCallback(async()=>{
   if(!api){setError('Сервер не подключён. Настройте Supabase для пилота.');setReady(true);return}
   const {data,error:authError}=await api.auth.getUser();
@@ -81,27 +83,28 @@ export default function CurriculumPage(){
   })();return()=>{active=false};
  },[uid,school]);
  useEffect(()=>{
-  if(!api||!uid||!school||!classId){setPlans([]);setTopics([]);setDrafts([]);setAssignments([]);return}
+  if(!api||!uid||!school||!classId){setPlans([]);setTopics([]);setDrafts([]);setKsp([]);setAssignments([]);return}
   let active=true;
   (async()=>{
    setError('');setMessage('');
-   const [pr,tr,dr,ar]=await Promise.all([
+   const [pr,tr,dr,kr,ar]=await Promise.all([
     api.from('curriculum_plans').select('id,school_id,class_id,teacher_id,subject,content,revision').eq('school_id',school).eq('class_id',classId).eq('teacher_id',uid).limit(100),
     api.from('curriculum_topics').select('id,school_id,class_id,teacher_id,plan_id,position,topic,hours,scheduled_on,goals').eq('school_id',school).eq('class_id',classId).eq('teacher_id',uid).limit(1000),
     api.from('lesson_drafts').select('id,curriculum_topic_id,topic').eq('school_id',school).eq('class_id',classId).eq('teacher_id',uid).limit(500),
+    api.from('ksp_documents').select('id,curriculum_topic_id,topic').eq('school_id',school).eq('class_id',classId).eq('teacher_id',uid).limit(500),
     api.from('assignments').select('id,curriculum_topic_id,topic,published').eq('school_id',school).eq('class_id',classId).eq('teacher_id',uid).limit(500)
    ]);
    if(!active)return;
-   const failed=[pr,tr,dr,ar].find(x=>x.error);
+   const failed=[pr,tr,dr,kr,ar].find(x=>x.error);
    if(failed?.error){setError('Не удалось получить связанные данные. Проверьте, применена ли миграция 20261126100000_curriculum_flow.sql. '+failed.error.message);return}
    const incoming=(pr.data||[]) as Plan[];
    setPlans(incoming);setPlanId(prev=>incoming.some(p=>p.id===prev)?prev:incoming[0]?.id||'');
-   setTopics((tr.data||[]) as Topic[]);setDrafts((dr.data||[]) as Draft[]);setAssignments((ar.data||[]) as Assignment[]);
+   setTopics((tr.data||[]) as Topic[]);setDrafts((dr.data||[]) as Draft[]);setKsp((kr.data||[]) as Ksp[]);setAssignments((ar.data||[]) as Assignment[]);
   })();return()=>{active=false};
  },[uid,school,classId,tick]);
  async function synchronize(){
   if(!api||!uid||!selectedPlan||busy||candidates.error||!candidates.rows.length)return;
-  if(hasLinks&&!matches){setError('В этом КТП уже существуют связанные уроки или задания. Изменение структуры тем заблокировано во избежание потери связей. Создайте новую редакцию КТП отдельно.');return}
+  if(hasLinks&&!matches){setError('В этом КТП уже существуют связанные КСП, уроки или задания. Изменение структуры тем заблокировано во избежание потери связей. Создайте новую редакцию КТП отдельно.');return}
   if(currentTopics.some(t=>t.position>candidates.rows.length)){setError('Число тем уменьшилось. Сначала согласуйте структуру КТП; автоматическое удаление существующих строк запрещено.');return}
   if(!window.confirm('Согласовать '+candidates.rows.length+' тем КТП с серверным реестром?'))return;
   setBusy(true);setError('');setMessage('');
@@ -144,8 +147,8 @@ export default function CurriculumPage(){
  <div className="actions"><button type="button" className="btn primary" disabled={busy||matches||!!candidates.error||!candidates.rows.length||(hasLinks&&!matches)} onClick={()=>void synchronize()}>{busy?'Сохранение…':matches?'КТП согласован':'Согласовать темы КТП'}</button><button type="button" className="btn" disabled={busy} onClick={()=>setTick(x=>x+1)}>Перечитать базу</button></div>
  {hasLinks&&!matches&&<p className="warning">К КТП привязаны материалы. Для изменения состава тем нужна контролируемая процедура обновления связей.</p>}
  <div className="card"><h2>Темы и связанные материалы</h2>{!currentTopics.length?<p className="muted">Сначала синхронизируйте темы.</p>:currentTopics.map(t=>{
- const linkedDrafts=drafts.filter(d=>d.curriculum_topic_id===t.id),linkedAssignments=assignments.filter(a=>a.curriculum_topic_id===t.id);
+ const linkedDrafts=drafts.filter(d=>d.curriculum_topic_id===t.id),linkedKsp=ksp.filter(d=>d.curriculum_topic_id===t.id),linkedAssignments=assignments.filter(a=>a.curriculum_topic_id===t.id);
  return <div key={t.id} className="item"><div><b>{t.position}. {t.topic}</b> <span className="tag">{t.hours} ч.</span></div><p className="muted">{t.goals||'Цель не указана'}{t.scheduled_on?' · '+t.scheduled_on:''}</p>
- <p className="muted">Уроков: {linkedDrafts.length}. Заданий: {linkedAssignments.length}.</p><div className="actions"><button className="btn" disabled={busy||!!linkedDrafts.length} onClick={()=>void createLesson(t)}>{linkedDrafts.length?'Черновик создан':'Создать черновик урока'}</button><Link href={'/assignments?topic='+encodeURIComponent(t.id)}>Открыть список заданий →</Link></div></div>})}</div></>}</section>}
+ <p className="muted">Уроков: {linkedDrafts.length}. КСП: {linkedKsp.length}. Заданий: {linkedAssignments.length}.</p><div className="actions"><button className="btn" disabled={busy||!!linkedDrafts.length} onClick={()=>void createLesson(t)}>{linkedDrafts.length?'Черновик создан':'Создать черновик урока'}</button><Link href={'/assignments?topic='+encodeURIComponent(t.id)}>Открыть список заданий →</Link></div></div>})}</div></>}</section>}
  </main></>;
 }
