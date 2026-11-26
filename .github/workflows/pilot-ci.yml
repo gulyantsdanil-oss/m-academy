@@ -80,9 +80,10 @@ jobs:
       - name: Backup and restore test database
         run: |
           set -euo pipefail
-          pg_dump --format=custom --no-owner --file=/tmp/m-academy-ci.dump
+          # Match pg_dump/pg_restore major version to the PostgreSQL 16 service.
+          docker run --rm --network host -e PGHOST -e PGPORT -e PGDATABASE -e PGUSER -e PGPASSWORD -v /tmp:/backup postgres:16 pg_dump --format=custom --no-owner --file=/backup/m-academy-ci.dump
           createdb academy_restored
-          pg_restore --no-owner --exit-on-error --dbname=academy_restored /tmp/m-academy-ci.dump
+          docker run --rm --network host -e PGHOST -e PGPORT -e PGUSER -e PGPASSWORD -v /tmp:/backup postgres:16 pg_restore --no-owner --exit-on-error --dbname=academy_restored /backup/m-academy-ci.dump
           psql -v ON_ERROR_STOP=1 -d academy_restored -c "SELECT count(*) FROM public.schools;"
       - name: Verify recovered schema and RLS after restoration
         run: psql -v ON_ERROR_STOP=1 -d academy_restored -f backend/pilot-app/tests/sql-rls-smoke.sql
