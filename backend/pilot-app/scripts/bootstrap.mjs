@@ -19,8 +19,8 @@ if(!list.every(x=>safeEmail(x[1]))){
  process.exitCode=1;
 }else if(new Set(list.map(x=>x[1].toLowerCase())).size!==list.length){
  console.error('Use three different test-only adult accounts.');process.exitCode=1;
-}else if(!/^\d{4}-\d{4}$/.test(year)||!classLabel.trim()){
- console.error('Invalid PILOT_YEAR or PILOT_CLASS');process.exitCode=1;
+}else if(!/^\d{4}-\d{4}$/.test(year)||!classLabel.trim()||!/(?:TEST|ТЕСТ)/i.test(schoolName)){
+ console.error('Invalid PILOT_YEAR or PILOT_CLASS, or pilot school name does not contain TEST/ТЕСТ.');process.exitCode=1;
 }else if(!apply){
  console.log('DRY RUN — no external account/database writes will occur.');
  console.log('School:',schoolName,'Test class:',classLabel,'Year:',year);
@@ -34,6 +34,11 @@ if(!list.every(x=>safeEmail(x[1]))){
  process.exitCode=1;
 }else{
  const db=createClient(env.SUPABASE_URL,env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+ // Do not silently create duplicate pilot schools after interrupted setup.
+ // A partial setup requires manual reconciliation in the trusted admin console.
+ const existing=await db.from('schools').select('id').eq('name',schoolName).limit(1);
+ if(existing.error)throw Error('Preflight check failed: '+existing.error.message);
+ if(existing.data?.length)throw Error('Test school already exists ('+existing.data[0].id+'). Reconcile existing memberships/classes instead of creating a duplicate.');
  const inserted=await db.from('schools').insert({name:schoolName}).select('id').single();
  if(inserted.error||!inserted.data)throw Error('School: '+(inserted.error?.message||'no ID'));
  const schoolId=inserted.data.id;
