@@ -105,6 +105,42 @@ begin
 end
 $$;
 
+-- Grade a submitted work as the assigned teacher, then verify student read access.
+set local request.jwt.claim.sub='11111111-1111-4111-8111-111111111111';
+do $
+declare
+ v_submission uuid;
+begin
+ select s.id into v_submission from public.submissions s limit 1;
+ if v_submission is null then raise exception 'Missing submission for grading'; end if;
+ insert into public.submission_grades(school_id,submission_id,graded_by,score,feedback)
+ values ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',v_submission,auth.uid(),1,'Верно');
+ if (select count(*) from public.submission_grades where submission_id=v_submission)<>1 then
+  raise exception 'Teacher cannot read assigned grade';
+ end if;
+end
+$;
+set local request.jwt.claim.sub='22222222-2222-4222-8222-222222222222';
+do $
+declare
+ v_row record;
+ v_blocked boolean:=false;
+ v_affected integer:=0;
+begin
+ select g.* into v_row from public.submission_grades g;
+ if not found or v_row.score<>1 or v_row.feedback<>'Верно' then
+  raise exception 'Student cannot read own score or feedback';
+ end if;
+ begin
+  update public.submission_grades set score=99 where submission_id=v_row.submission_id;
+  get diagnostics v_affected = row_count;
+  v_blocked:=v_affected=0;
+ exception when insufficient_privilege then v_blocked:=true;
+ end;
+ if not v_blocked then raise exception 'Student changed teacher grade'; end if;
+end
+$;
+
 -- Unassigned users cannot read assignments, self-provision membership or publish.
 set local request.jwt.claim.sub='33333333-3333-4333-8333-333333333333';
 do $$
@@ -115,6 +151,7 @@ declare
 begin
  if (select count(*) from public.classes)<>0 then raise exception 'Unassigned user read classes'; end if;
  if (select count(*) from public.assignments)<>0 then raise exception 'Unassigned user read assignments'; end if;
+ if (select count(*) from public.submission_grades)<>0 then raise exception 'Unassigned user read grades'; end if;
  begin
   insert into public.memberships(school_id,user_id,role)
    values ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',auth.uid(),'admin');
