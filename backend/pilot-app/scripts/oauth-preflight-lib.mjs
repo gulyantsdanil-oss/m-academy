@@ -1,6 +1,7 @@
 // Local, offline-only deployment configuration validation.
 // This module never calls Supabase or Google and never prints keys.
-const forbidden=/^(?:service_role|sb_secret_|eyJ[A-Za-z0-9_-]*\.)/i;
+const forbidden=/^(?:service_role|sb_secret_)/i;
+function jwtRole(key){try{const p=JSON.parse(Buffer.from(key.split('.')[1],'base64url').toString('utf8'));return p?.role}catch{return null}}
 export function analyzeDeployment({siteUrl,supabaseUrl,publicKey,production=true}={}){
  const issues=[];
  const notes=[];
@@ -31,7 +32,7 @@ export function analyzeDeployment({siteUrl,supabaseUrl,publicKey,production=true
   if(production&&local)issues.push('Supabase: localhost не является публичным проектом');
  }
  if(typeof publicKey!=='string'||!publicKey.trim())issues.push('Публичный ключ Supabase отсутствует');
- else if(forbidden.test(publicKey.trim()))issues.push('Запрещён service_role/секретный ключ в публичных переменных');
+ else if(forbidden.test(publicKey.trim())||jwtRole(publicKey.trim())==='service_role')issues.push('Запрещён service_role/секретный ключ в публичных переменных');
  else if(!/^sb_publishable_[A-Za-z0-9_-]+$/.test(publicKey.trim())&&!/^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(publicKey.trim()))
   notes.push('Проверьте, что используется именно publishable/anon ключ Supabase, а не произвольное значение');
  const callback=project?new URL('/auth/v1/callback',project).toString():null;
