@@ -1,3 +1,14 @@
+## HTTP-проверка серверного пилота — 26 ноября 2026
+
+- В `backend/pilot-app/app/api/health/route.ts` добавлен минимальный HTTP liveness без секретов или сведений о пользователях. Проверяется только, что процесс Next.js отвечает; это **не** readiness Supabase.
+- В `scripts/http-smoke.mjs` добавлена проверка HTTP 200 для `/`, `/auth-check`, `/admin/roster`, `/curriculum`, `/lessons`, `/classes`, `/results`, `/help`, и JSON endpoint `/api/health`.
+- GitHub Actions теперь запускает `npm run start` **после** успешной production-сборки и выполняет сетевые запросы к запущенному серверу.
+- `next.config.mjs` добавляет базовые защитные заголовки, включая `X-Robots-Tag: noindex, nofollow`, для пилотной среды без публичной индексации.
+- [GitHub Actions: успешны production HTTP smoke, тесты, TypeScript, PostgreSQL RLS, backup/restore](https://github.com/gulyantsdanil-oss/m-academy/actions/runs/45805698667).
+- [План ручного развёртывания после разрешений](DEPLOYMENT-PILOT.md).
+
+**Не завершено:** фактический хостинг Next.js, реальная Google OAuth авторизация, пользовательское тестирование на действующем Supabase и аудит допуска школьных данных.
+
 ## Проверка конфигурации OAuth перед развёртыванием — 26 ноября 2026
 
 - Добавлена автономная команда `cd backend/pilot-app && npm run auth:preflight` и библиотека `scripts/oauth-preflight-lib.mjs`. При наличии `PILOT_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` проверяются HTTPS, отсутствие пути или параметров в origin, отсутствие GitHub Pages в качестве серверного адреса и запрет service-role JWT/`sb_secret_*` в публичной переменной.
