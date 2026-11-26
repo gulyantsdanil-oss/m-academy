@@ -24,7 +24,7 @@ test('client curriculum is scoped to authenticated teacher and supports stable I
  assert.match(curriculum,/api\.auth\.getUser\(\)/);
  assert.match(curriculum,/\.eq\('role','teacher'\)/);
  assert.match(curriculum,/\.eq\('teacher_id',uid\)/);
- assert.match(curriculum,/\.from\('curriculum_topics'\)\.insert/);
+ assert.match(curriculum,/\.rpc\('sync_curriculum_topics'/);
  assert.match(curriculum,/curriculum_topic_id:t\.id/);
  assert.match(curriculum,/if\(hasLinks&&!matches\)/);
  assert.match(curriculum,/currentTopics\.some\(t=>t\.position>candidates\.rows\.length\)/);
@@ -32,7 +32,7 @@ test('client curriculum is scoped to authenticated teacher and supports stable I
 test('assignment creation accepts canonical curriculum topic FK',()=>{
  assert.match(builder,/\.from\('curriculum_topics'\)/);
  assert.match(builder,/\.eq\('teacher_id',teacherId\)/);
- assert.match(builder,/curriculum_topic_id:topicId/);
+ assert.match(builder,/p_curriculum_topic:topicId/);
 });
 
 test('teacher assignment publication is one invoker-rights SQL transaction',()=>{
@@ -45,4 +45,19 @@ test('teacher assignment publication is one invoker-rights SQL transaction',()=>
  assert.match(publication,/grant execute on function public\.publish_teacher_assignment/);
  assert.match(builder,/\.rpc\('publish_teacher_assignment'/);
  assert.doesNotMatch(builder,/\.from\('assignment_keys'\)\.insert/);
+});
+
+test('curriculum sync is transactional and refuses linked topic mutations',()=>{
+ const sql=read('../supabase/migrations/20261126_atomic_curriculum_sync.sql');
+ assert.match(sql,/security invoker/);
+ assert.match(sql,/for update/);
+ assert.match(sql,/Linked topic changed at position/);
+ assert.match(sql,/on conflict\(plan_id,position\) do update/);
+ assert.match(sql,/grant execute on function public\.sync_curriculum_topics/);
+});
+test('KSP editor can attach to a curriculum topic without auto changing existing documents',()=>{
+ const editor=read('components/TeacherMaterials.tsx');
+ assert.match(migration,/ksp_documents_curriculum_topic_fk/);
+ assert.match(editor,/curriculum_topic_id:curriculumTopicId/);
+ assert.match(editor,/disabled=\{!!selected\}/);
 });
