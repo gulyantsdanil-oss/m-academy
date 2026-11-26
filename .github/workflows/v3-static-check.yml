@@ -5,6 +5,7 @@ on:
     paths:
       - 'v3.html'
       - 'v3-workflow.html'
+      - 'v3-data.html'
       - 'index.html'
       - 'scripts/check-v3.mjs'
       - '.github/workflows/v3-static-check.yml'
@@ -12,6 +13,7 @@ on:
     paths:
       - 'v3.html'
       - 'v3-workflow.html'
+      - 'v3-data.html'
       - 'index.html'
       - 'scripts/check-v3.mjs'
       - '.github/workflows/v3-static-check.yml'
