@@ -1,0 +1,28 @@
+name: M-academy v3 static checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'v3.html'
+      - 'v3-workflow.html'
+      - 'index.html'
+      - 'scripts/check-v3.mjs'
+      - '.github/workflows/v3-static-check.yml'
+  pull_request:
+    paths:
+      - 'v3.html'
+      - 'v3-workflow.html'
+      - 'index.html'
+      - 'scripts/check-v3.mjs'
+      - '.github/workflows/v3-static-check.yml'
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check inline JavaScript and local links
+        run: node scripts/check-v3.mjs
