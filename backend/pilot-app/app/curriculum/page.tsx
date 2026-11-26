@@ -106,23 +106,15 @@ export default function CurriculumPage(){
   if(!window.confirm('Согласовать '+candidates.rows.length+' тем КТП с серверным реестром?'))return;
   setBusy(true);setError('');setMessage('');
   try{
-   // Existing positions are updated in place (preserving IDs and foreign-key links).
-   // Removing linked topics is deliberately not automated.
-   const original=new Map(currentTopics.map(t=>[t.position,t]));
-   for(const row of candidates.rows){
-    const old=original.get(row.position);
-    if(old){
-     if(old.topic===row.topic&&old.hours===row.hours&&old.goals===row.goals&&(old.scheduled_on||null)===row.scheduled_on)continue;
-     const res=await api.from('curriculum_topics').update({topic:row.topic,hours:row.hours,goals:row.goals,scheduled_on:row.scheduled_on,updated_at:new Date().toISOString()}).eq('id',old.id).eq('school_id',school).eq('teacher_id',uid);
-     if(res.error)throw new Error(res.error.message);
-    }else{
-     const res=await api.from('curriculum_topics').insert({school_id:school,class_id:classId,teacher_id:uid,plan_id:selectedPlan.id,...row});
-     if(res.error)throw new Error(res.error.message);
-    }
-   }
-
+   // Atomic function validates all rows and preserves topic IDs in a single transaction.
+   const {data,error:syncError}=await api.rpc('sync_curriculum_topics',{
+    p_plan:selectedPlan.id,p_rows:candidates.rows.map(r=>({
+     topic:r.topic,hours:r.hours,scheduled_on:r.scheduled_on,goals:r.goals
+    }))
+   });
+   if(syncError||data!==candidates.rows.length)throw Error(syncError?.message||'Сервер не подтвердил число тем.');
    setMessage('Реестр тем синхронизирован с КТП.');setTick(x=>x+1);
-  }catch(err){setError('Часть записей могла быть сохранена. Обновите страницу и проверьте совпадения. '+(err instanceof Error?err.message:'Ошибка сохранения'))}
+  }catch(err){setError('Синхронизация отклонена. '+(err instanceof Error?err.message:'Ошибка сохранения'))}
   finally{setBusy(false)}
  }
  async function createLesson(t:Topic){
