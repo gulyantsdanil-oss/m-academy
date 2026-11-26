@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 const read=(file)=>readFileSync(join(process.cwd(),file),'utf8');
-const migration=read('../supabase/migrations/20261126_curriculum_flow.sql');
+const migration=read('../supabase/migrations/20261126100000_curriculum_flow.sql');
 const curriculum=read('app/curriculum/page.tsx');
 const builder=read('components/TeacherAssignmentBuilder.tsx');
 test('canonical curriculum topics are restricted to teacher memberships and same-class plans',()=>{
@@ -36,7 +36,7 @@ test('assignment creation accepts canonical curriculum topic FK',()=>{
 });
 
 test('teacher assignment publication is one invoker-rights SQL transaction',()=>{
- const publication=read('../supabase/migrations/20261126_atomic_assignment_publish.sql');
+ const publication=read('../supabase/migrations/20261126120000_atomic_assignment_publish.sql');
  assert.match(publication,/function public\.publish_teacher_assignment/);
  assert.match(publication,/security invoker/);
  assert.match(publication,/app_private\.is_teacher_of\(p_class\)/);
@@ -48,7 +48,7 @@ test('teacher assignment publication is one invoker-rights SQL transaction',()=>
 });
 
 test('curriculum sync is transactional and refuses linked topic mutations',()=>{
- const sql=read('../supabase/migrations/20261126_atomic_curriculum_sync.sql');
+ const sql=read('../supabase/migrations/20261126110000_atomic_curriculum_sync.sql');
  assert.match(sql,/security invoker/);
  assert.match(sql,/pg_catalog\.pg_advisory_xact_lock/);
  assert.match(sql,/Linked topic changed at position/);
