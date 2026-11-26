@@ -15,7 +15,7 @@ const phases=[
  ['student','Действия ученика'],['evaluation','Оценивание'],['resources','Ресурсы']
 ] as const;
 const rowsKtp=[
- ['topic','Тема'],['hours','Часы'],['date','Дата'],['objectives','Цели обучения (проверить по программе)']
+ ['topic','Тема'],['hours','Часы'],['date','Дата'],['goals','Цели обучения (проверить по программе)']
 ] as const;
 function Field({id,label,value,onChange,multiline=false}:{
  id:string;label:string;value:unknown;onChange:(v:string)=>void;multiline?:boolean
@@ -45,7 +45,7 @@ export function MaterialForm({kind,value,onChange}:Props){
  }
  const rows=Array.isArray(value.rows)?value.rows.filter(isObject):[];
  const setField=(k:string,v:string)=>onChange({...value,[k]:v});
- const setRow=(i:number,k:string,v:string)=>onChange({...value,rows:rows.map((r,j)=>j===i?{...r,[k]:k==='hours'?Math.max(0,Math.min(100,Number(v)||0)):v}:r)});
+ const setRow=(i:number,k:string,v:string)=>onChange({...value,rows:rows.map((r,j)=>j===i?{...r,[k]:k==='hours'?Math.max(1,Math.min(50,Number(v)||1)):v}:r)});
  return <div className="material-form">
   <h3>КТП · учебный план</h3>
   <div className="grid">
@@ -56,7 +56,7 @@ export function MaterialForm({kind,value,onChange}:Props){
   <h3>Распределение тем</h3>
   {rows.map((row,i)=><div className="card" style={{boxShadow:'none'}} key={i}>
    <div className="actions"><b>Тема {i+1}</b><button type="button" className="btn" onClick={()=>onChange({...value,rows:rows.filter((_,j)=>j!==i)})}>Удалить</button></div>
-   <div className="grid">{rowsKtp.map(([key,label])=><Field key={key} id={'row-'+i+'-'+key} label={label} value={row[key]} multiline={key==='objectives'} onChange={v=>setRow(i,key,v)}/>)}</div>
+   <div className="grid">{rowsKtp.map(([key,label])=><Field key={key} id={'row-'+i+'-'+key} label={label} value={key==='goals'?(row.goals??row.objectives??row.learning_goals):row[key]} multiline={key==='goals'} onChange={v=>setRow(i,key,v)}/>)}</div>
   </div>)}
   <button type="button" className="btn" disabled={rows.length>=300} onClick={()=>onChange({...value,rows:[...rows,{topic:'',hours:1,date:''}]})}>Добавить тему</button>
  </div>
