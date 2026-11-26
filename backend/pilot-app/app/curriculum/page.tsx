@@ -93,7 +93,7 @@ export default function CurriculumPage(){
    ]);
    if(!active)return;
    const failed=[pr,tr,dr,ar].find(x=>x.error);
-   if(failed?.error){setError('Не удалось получить связанные данные. Проверьте, применена ли миграция 20261126_curriculum_flow.sql. '+failed.error.message);return}
+   if(failed?.error){setError('Не удалось получить связанные данные. Проверьте, применена ли миграция 20261126100000_curriculum_flow.sql. '+failed.error.message);return}
    const incoming=(pr.data||[]) as Plan[];
    setPlans(incoming);setPlanId(prev=>incoming.some(p=>p.id===prev)?prev:incoming[0]?.id||'');
    setTopics((tr.data||[]) as Topic[]);setDrafts((dr.data||[]) as Draft[]);setAssignments((ar.data||[]) as Assignment[]);
