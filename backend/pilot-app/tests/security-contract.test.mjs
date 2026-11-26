@@ -25,7 +25,7 @@ test('RLS checks both teacher and student class membership',()=>{
  assert.match(initial,/function\s+app_private\.is_student_of/i);
  assert.match(initial,/function\s+app_private\.has_role/i);
  assert.match(initial,policy('assignments_student_select'));
- assert.match(initial,policy('submissions_student_select'));
+ assert.match(initial,policy('submission_student_select'));
 });
 test('Students cannot write grades or answer keys directly',()=>{
  assert.doesNotMatch(initial,/grant\s+update\s*\(\s*score[^)]*\)\s+on\s+public\.submission_grades\s+to\s+anon/i);
