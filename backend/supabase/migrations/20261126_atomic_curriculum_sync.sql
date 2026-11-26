@@ -22,8 +22,11 @@ declare
  v_date_text text;
 begin
  if auth.uid() is null then raise exception 'Authentication required'; end if;
+ -- Advisory transaction lock serializes sync calls without granting plan UPDATE privileges.
+ -- The existing document-revision RPC deliberately denies direct plan content updates.
+ perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_plan::text,0));
  select * into v_plan from public.curriculum_plans p
-  where p.id=p_plan and p.teacher_id=auth.uid() for update;
+  where p.id=p_plan and p.teacher_id=auth.uid();
  if not found then raise exception 'Plan unavailable'; end if;
  if not app_private.is_teacher_of(v_plan.class_id) then raise exception 'Teacher not assigned'; end if;
  if p_rows is null or jsonb_typeof(p_rows)<>'array' then raise exception 'Expected array'; end if;
