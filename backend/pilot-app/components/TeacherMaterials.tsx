@@ -24,6 +24,37 @@ function validMaterial(kind:Kind,v:unknown):v is Record<string,unknown>{
  return Array.isArray(v.rows)&&v.rows.length<=1000&&v.rows.every(x=>jsonObject(x));
 }
 function archiveEntries(value:unknown):BackupRow[]{
+ // M-academy 3.1 curriculum export: preview as a single teacher-controlled KTP draft.
+ // No automatic class resolution: the teacher explicitly selects the target class.
+ if(jsonObject(value)&&value.version===1&&Array.isArray(value.topics)&&Array.isArray(value.assignments)){
+  if(value.topics.length>1000||value.assignments.length>2000)throw Error('Архив 3.1 превышает допустимые лимиты.');
+  const mapped=value.topics.map((v:unknown)=>{
+   if(!jsonObject(v)||typeof v.topic!=='string'||v.topic.trim().length<2||v.topic.length>250||
+     !Number.isInteger(v.hours)||Number(v.hours)<1||Number(v.hours)>50||
+     typeof v.grade!=='string'||!/^(?:[5-9]|10|11)$/.test(v.grade)||
+     typeof v.subject!=='string'||v.subject.length>90||
+     typeof v.group!=='string'||v.group.length>12||
+     typeof v.goals!=='string'||v.goals.length>500||
+     typeof v.date!=='string'||(v.date!==''&&!/^\d{4}-\d{2}-\d{2}$/.test(v.date)))
+    throw Error('В архиве 3.1 есть некорректные строки КТП.');
+   return {grade:v.grade,group:v.group,subject:v.subject,topic:v.topic,
+    hours:Number(v.hours),goals:v.goals,date:v.date};
+  });
+  const keys=new Map<string,typeof mapped>();
+  for(const t of mapped){
+   const k=t.grade+'|'+t.group+'|'+t.subject;
+   if(!keys.has(k))keys.set(k,[]);
+   keys.get(k)!.push(t);
+  }
+  return [...keys.entries()].map(([key,rows])=>{
+   const [grade,group,subject]=key.split('|');
+   const data:Record<string,unknown>={grade,group,subject,year:'2026-2027',
+    rows:rows.map(r=>({topic:r.topic,hours:r.hours,date:r.date,goals:r.goals}))};
+   if(!validMaterial('ktp',data))throw Error('Материал КТП 3.1 слишком большой.');
+   return {kind:'ktp' as const,title:grade+group+' · '+subject,data};
+  });
+ }
+
  if(!jsonObject(value)||value.app!=='M-academy'||!['local-backup-v1','local-backup-v2'].includes(String(value.schema))||!jsonObject(value.collections))throw Error('Неизвестный формат резервной копии.');
  const content=value.collections;
  const out:BackupRow[]=[];
@@ -138,7 +169,7 @@ export function TeacherMaterials({
   setKind(chosen.kind);setSelected('');setRevision(null);
   setTitle(chosen.title);
   setEditor(stringify(chosen.data));
-  setMessage('Содержимое загружено только в редактор. Проверьте данные, класс и содержание перед серверным сохранением.');
+  setMessage('Содержимое загружено только в редактор. Проверьте данные, класс назначения, предмет и содержание перед серверным сохранением.');
   setError('');
  }
  function exportDocument(){
@@ -180,7 +211,7 @@ export function TeacherMaterials({
    {selected&&<p className="muted">Документ: {selected.slice(0,8)}… · текущая редакция {revision}</p>}
    <hr/>
    <h3>Перенос из локальной версии</h3>
-   <p className="muted">Выберите резервную копию M-academy v1/v2. Архив только читается и показывает предпросмотр: ничего автоматически не отправляется. Импорт выполняется по одному материалу после проверки и сохранения.</p>
+   <p className="muted">Выберите резервную копию M-academy v1/v2 или экспорт учебного конвейера 3.1. Архив только читается и показывает предпросмотр: ничего автоматически не отправляется. Импорт выполняется по одному материалу после проверки и сохранения.</p>
    <label htmlFor="matImport">Резервная копия .json (до 2 МБ)</label>
    <input id="matImport" type="file" accept=".json,application/json" onChange={e=>void readBackup(e)}/>
    {imports.length>0&&<><label htmlFor="matImportSelect">Найденные КСП и КТП</label>
