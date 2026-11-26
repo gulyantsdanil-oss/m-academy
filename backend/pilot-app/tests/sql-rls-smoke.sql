@@ -121,7 +121,7 @@ begin
 end
 $grade_teacher$;
 set local request.jwt.claim.sub='22222222-2222-4222-8222-222222222222';
-do $
+do $grade_student$
 declare
  v_row record;
  v_blocked boolean:=false;
