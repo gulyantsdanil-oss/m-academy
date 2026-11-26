@@ -89,7 +89,7 @@ export function TeacherAssignmentBuilder({
  <div className="actions"><button className="btn" type="button" disabled={busy} onClick={()=>{setTopic("Арифметическая прогрессия");setQuestions(arithmeticSample.map(q=>({...q})));setMessage("Пример загружен. Проверьте задания и ответы перед публикацией.");setError("");}}>Заполнить пример по арифметической прогрессии</button></div>
  <form onSubmit={e=>void create(e)}>
  <label htmlFor="assignmentClass">Мой класс</label>
- <select id="assignmentClass" value={chosen} onChange={e=>setClassId(e.target.value)}>
+ <select id="assignmentClass" value={chosen} onChange={e=>{setClassId(e.target.value);setTopicId('');setCurriculumTopics([]);setCurriculumError('')}}>
  {options.map(x=><option value={x.id} key={x.id}>{x.label} · {x.academic_year}</option>)}
  </select>
  <label htmlFor="assignmentCurriculumTopic">Связать с КТП (необязательно)</label>
