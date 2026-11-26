@@ -4,13 +4,15 @@ begin;
 insert into auth.users(id) values
  ('11111111-1111-4111-8111-111111111111'),
  ('22222222-2222-4222-8222-222222222222'),
- ('33333333-3333-4333-8333-333333333333');
+ ('33333333-3333-4333-8333-333333333333'),
+ ('44444444-4444-4444-8444-444444444444');
 insert into public.schools(id,name) values
  ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','School A'),
  ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','School B');
 insert into public.memberships(school_id,user_id,role) values
  ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','11111111-1111-4111-8111-111111111111','teacher'),
- ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','22222222-2222-4222-8222-222222222222','student');
+ ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','22222222-2222-4222-8222-222222222222','student'),
+ ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','44444444-4444-4444-8444-444444444444','admin');
 insert into public.classes(id,school_id,label,academic_year) values
  ('cccccccc-cccc-4ccc-8ccc-cccccccccccc','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','9Ж','2026-2027'),
  ('dddddddd-dddd-4ddd-8ddd-dddddddddddd','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','10Д','2026-2027');
@@ -140,6 +142,32 @@ begin
  if not v_blocked then raise exception 'Student changed teacher grade'; end if;
 end
 $grade_student$;
+
+-- Admin cannot assign an account to a class under an incorrect school role.
+set local request.jwt.claim.sub='44444444-4444-4444-8444-444444444444';
+do $check_roster$
+declare
+ v_teacher_denied boolean:=false;
+ v_student_denied boolean:=false;
+begin
+ begin
+  insert into public.class_teachers(school_id,class_id,teacher_id,subject)
+  values('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+         'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+         '22222222-2222-4222-8222-222222222222','Математика');
+ exception when others then v_teacher_denied:=true;
+ end;
+ if not v_teacher_denied then raise exception 'Student assigned to teacher roster'; end if;
+ begin
+  insert into public.class_students(school_id,class_id,student_id)
+  values('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+         'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+         '11111111-1111-4111-8111-111111111111');
+ exception when others then v_student_denied:=true;
+ end;
+ if not v_student_denied then raise exception 'Teacher assigned to student roster'; end if;
+end
+$check_roster$;
 
 -- Unassigned users cannot read assignments, self-provision membership or publish.
 set local request.jwt.claim.sub='33333333-3333-4333-8333-333333333333';
