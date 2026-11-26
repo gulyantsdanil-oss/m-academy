@@ -98,6 +98,19 @@ export default function PilotHome(){
   return()=>{alive=false};
  },[active,user,refreshToken]);
 
+ async function signInWithGoogle(){
+  if(!client||sending)return;
+  setError('');setMessage('');setSending(true);
+  // Supabase performs Google OAuth. Firebase tokens from ECO CLUB are never
+  // passed to this application. Roles must already be approved in Supabase.
+  const redirectTo=new URL('/',window.location.origin).toString();
+  const {error:loginError}=await client.auth.signInWithOAuth({
+   provider:'google',
+   options:{redirectTo,queryParams:{prompt:'select_account'}}
+  });
+  if(loginError){setError('Вход через Google недоступен: '+loginError.message);setSending(false)}
+  // Successful requests navigate away; keep the button disabled during redirect.
+ }
  async function sendLogin(e:FormEvent){
   e.preventDefault();if(!client)return;
   const clean=email.trim().toLowerCase();
@@ -130,7 +143,7 @@ export default function PilotHome(){
  <main className="container"><h1>Кабинеты, классы и задания</h1><p className="muted">Отдельное пилотное приложение. Реальная авторизация требует развёрнутой базы данных и настройки доступа. Пользовательские роли назначаются администратором вне публичного интерфейса.</p><div className="warning"><b>Пилот без персональных данных.</b> Не регистрируйте реальных учеников и не загружайте их сведения до утверждения политики обработки данных, проверки размещения сервера, резервного копирования и тестирования безопасности.</div>
  <ErrorText value={error}/>
  {readiness==='loading'&&<p>Проверка сеанса…</p>}
- {readiness==='logged_out'&&<section className="card"><h2>Вход по ссылке на email</h2><p className="muted">Для теста используйте технические адреса взрослых участников пилота. Новый аккаунт не получает роль автоматически.</p><form onSubmit={e=>void sendLogin(e)}><label htmlFor="email">Email</label><input id="email" type="email" required autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)}/><p><button disabled={sending} className="btn primary" type="submit">{sending?'Отправка…':'Получить ссылку для входа'}</button></p></form>{message&&<p className="success">{message}</p>}</section>}
+ {readiness==='logged_out'&&<section className="card"><h2>Единый Google-вход</h2><p className="muted">Можно использовать тот же Google-аккаунт, что и в ECO CLUB. M-academy проверяет роли отдельно: Google-вход не означает автоматическое разрешение на доступ к классам.</p><p><button type="button" disabled={sending} className="btn primary" onClick={()=>void signInWithGoogle()}>{sending?'Переход в Google…':'Войти через Google'}</button></p><p className="muted">Для тестовых взрослых аккаунтов также доступен резервный вход по ссылке на email.</p><form onSubmit={e=>void sendLogin(e)}><label htmlFor="email">Email</label><input id="email" type="email" required autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)}/><p><button disabled={sending} className="btn primary" type="submit">{sending?'Отправка…':'Получить ссылку для входа'}</button></p></form>{message&&<p className="success">{message}</p>}</section>}
  {readiness==='ready'&&user&&<><section className="card"><h2>Текущий сеанс</h2><p><b>Пользователь:</b> {user.email||shortId(user.id)}</p>{memberships.length===0?<p className="warning">Для аккаунта нет действующих назначений в школах. Роль назначается только через доверенное администрирование — автоматически учителем или администратором стать нельзя.</p>:<><label htmlFor="school">Школа / роль</label><select id="school" value={activeSchoolId} onChange={e=>setActiveSchoolId(e.target.value)}>{memberships.map(v=><option key={v.school.id} value={v.school.id}>{v.school.name} — {v.membership.role}</option>)}</select></>}</section>
  {active&&<><section className="card"><h2>Доступные классы</h2>{classes.length===0?<p className="muted">В этом аккаунте ещё нет доступных классов.</p>:classes.map(c=><div className="item" key={c.id}><b>{c.label}</b> · {c.academic_year}</div>)}</section>
  {active.membership.role==='admin'&&<section className="card"><h2>Администратор школы</h2><p className="muted">Можно добавить учебный класс. Назначения пользователей и ролей не доступны из браузера.</p><form onSubmit={e=>void addClass(e)} className="grid"><div><label htmlFor="className">Название класса</label><input id="className" value={name} maxLength={40} placeholder="9Ж" onChange={e=>setName(e.target.value)}/></div><div><label htmlFor="year">Учебный год</label><input id="year" value={academicYear} onChange={e=>setAcademicYear(e.target.value)}/></div><p><button className="btn primary" disabled={creating}>{creating?'Сохранение…':'Добавить класс'}</button></p></form></section>}
