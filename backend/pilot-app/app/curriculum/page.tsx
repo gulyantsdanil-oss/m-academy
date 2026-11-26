@@ -15,7 +15,7 @@ function decodeRows(content:unknown):Candidate[]{
  if(!asObj(content)||!Array.isArray(content.rows)||content.rows.length>1000)throw Error('КТП не содержит корректного массива rows (максимум 1000).');
  return content.rows.map((row:unknown,i:number)=>{
   if(!asObj(row))throw Error('Строка '+(i+1)+' имеет неверный формат.');
-  const topic=String(row.topic??'').trim(),hours=Number(row.hours??1),goals=String(row.goals??row.learning_goals??'');
+  const topic=String(row.topic??'').trim(),hours=Number(row.hours??1),goals=String(row.goals??row.objectives??row.learning_goals??'');
   const date=String(row.date??'').trim();
   if(topic.length<2||topic.length>300||!Number.isInteger(hours)||hours<1||hours>50||goals.length>2000||
     (date&&!/^\d{4}-\d{2}-\d{2}$/.test(date)))throw Error('Исправьте тему, часы, цели или дату в строке '+(i+1)+'. Дата должна быть ГГГГ-ММ-ДД.');
