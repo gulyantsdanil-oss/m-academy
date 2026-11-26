@@ -35,3 +35,12 @@ test('data displayed is restricted to accessible classes and no static demo impe
  assert.match(file,/classes\.filter\(c=>permitted\.has\(c\.id\)\)/);
  assert.doesNotMatch(file,/setRole\(/);
 });
+
+test('v3.1 KTP import remains preview-only until explicit teacher save',()=>{
+ const src=readFileSync(join(root,'components/TeacherMaterials.tsx'),'utf8');
+ assert.match(src,/value\.version===1&&Array\.isArray\(value\.topics\)/);
+ assert.match(src,/validMaterial\('ktp',data\)/);
+ assert.match(src,/setEditor\(stringify\(chosen\.data\)\)/);
+ assert.match(src,/setSelected\(''\)/);
+ assert.match(src,/api\.from\(tableFor\(kind\)\)\.insert\(base\)/);
+});
