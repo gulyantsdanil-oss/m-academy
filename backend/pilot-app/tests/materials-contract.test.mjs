@@ -54,3 +54,13 @@ test('Teacher material editor exposes visual KSP stage and KTP topic fields',()=
  assert.match(teacher,/MaterialForm/);
  assert.match(teacher,/showJson/);
 });
+
+test('10th-grade demo curriculum populates editor only; persistence remains explicit',()=>{
+ assert.match(teacher,/const exampleKtp10=/);
+ for(const topic of ['Простейшие тригонометрические уравнения','Методы решения тригонометрических уравнений','Простейшие тригонометрические неравенства'])assert.ok(teacher.includes(topic),topic);
+ const fragment=teacher.slice(teacher.indexOf('function loadExampleKtp()'),teacher.indexOf('function pick(id:string)'));
+ assert.match(fragment,/setEditor\(stringify\(exampleKtp10\(\)\)\)/);
+ assert.match(fragment,/setSelected\(''\)/);
+ assert.doesNotMatch(fragment,/\.insert\(|\.rpc\(|\.update\(/);
+ assert.match(teacher,/Подставить 3 тестовые темы \(без сохранения\)/);
+});
