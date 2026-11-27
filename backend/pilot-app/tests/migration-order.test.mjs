@@ -10,7 +10,8 @@ const expected=[
  '20261126100000_curriculum_flow.sql',
  '20261126110000_atomic_curriculum_sync.sql',
  '20261126120000_atomic_assignment_publish.sql',
- '20261126130000_roster_roles.sql'
+ '20261126130000_roster_roles.sql',
+ '20261127120000_admin_school_directory.sql'
 ];
 test('migration names have unique sortable timestamps and strict dependency order',()=>{
  const found=readdirSync(dir).filter(s=>s.endsWith('.sql')).sort();
@@ -26,6 +27,7 @@ test('base tables precede canonical topics, transactional APIs and privilege che
  assert.match(sql[4],/function public\.sync_curriculum_topics/);
  assert.match(sql[5],/function public\.publish_teacher_assignment/);
  assert.match(sql[6],/function app_private\.validate_class_roster_role/);
+ assert.match(sql[7],/function public\.admin_school_directory/);
  for(const statement of sql.slice(3)){
   assert.match(statement,/begin;/i);
   assert.match(statement,/commit;/i);
