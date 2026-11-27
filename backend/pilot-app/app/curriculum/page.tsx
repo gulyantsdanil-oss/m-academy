@@ -27,6 +27,7 @@ function decodeRows(content:unknown):Candidate[]{
 export default function CurriculumPage(){
  const [uid,setUid]=useState('');
  const [school,setSchool]=useState('');
+ const [schoolNames,setSchoolNames]=useState<Record<string,string>>({});
  const [memberships,setMemberships]=useState<Membership[]>([]);
  const [classes,setClasses]=useState<ClassRoom[]>([]);
  const [teaching,setTeaching]=useState<TeacherAssignment[]>([]);
@@ -62,6 +63,10 @@ export default function CurriculumPage(){
   const mr=await api.from('memberships').select('school_id,role,active').eq('user_id',id).eq('role','teacher').eq('active',true);
   if(mr.error){setError(mr.error.message);setReady(true);return}
   const memberships=(mr.data||[]) as Membership[];setMemberships(memberships);
+  if(memberships.length){
+   const names=await api.from('schools').select('id,name').in('id',memberships.map(m=>m.school_id));
+   if(!names.error)setSchoolNames(Object.fromEntries((names.data||[]).map(v=>[v.id as string,v.name as string])));
+  }
   if(!memberships.length)setError('Пользователь не назначен учителем ни в одной школе.');
   setSchool(s=>memberships.some(m=>m.school_id===s)?s:memberships[0]?.school_id||'');setReady(true);
  },[]);
@@ -137,12 +142,12 @@ export default function CurriculumPage(){
  }
  return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">4.1 · КТП → урок → задание</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/overview">Панель 4.0</Link><Link href="/lessons">Редактор уроков</Link><Link href="/assignments">Задания</Link><Link href="/results">Результаты</Link></nav></div></header>
  <main className="container"><h1>Связанные учебные материалы</h1><p className="muted">Каждая тема получает постоянный идентификатор в базе. Уроки и задания могут ссылаться на него без поиска по названию.</p>
- <div className="warning"><b>Пилотная функция.</b> Не используйте реальные данные учащихся до завершения проверки безопасности. КТП должен быть загружен педагогом в серверный редактор; синхронизация требует новой миграции SQL.</div>
+ <div className="warning"><b>Пилотная функция.</b> Не используйте реальные данные учащихся до завершения проверки безопасности. КТП сначала сохраняется педагогом в серверном редакторе, затем темы синхронизируются отдельной кнопкой. Реальные данные учеников не используйте.</div>
  {!ready&&<p>Проверка доступа…</p>}
  {error&&<p role="alert" className="error">{error}</p>}{message&&<p role="status" className="success">{message}</p>}
- {!!memberships.length&&<section className="card"><div className="grid"><div><label htmlFor="flowSchool">Школа</label><select id="flowSchool" value={school} onChange={e=>{setSchool(e.target.value);setClassId('');setPlanId('')}}>{memberships.map(m=><option key={m.school_id} value={m.school_id}>{m.school_id.slice(0,8)}…</option>)}</select></div><div><label htmlFor="flowClass">Мой класс</label><select id="flowClass" value={classId} onChange={e=>{setClassId(e.target.value);setPlanId('')}}>{availableClasses.map(c=><option key={c.id} value={c.id}>{c.label} · {c.academic_year}</option>)}</select></div></div>
+ {!!memberships.length&&<section className="card"><div className="grid"><div><label htmlFor="flowSchool">Школа</label><select id="flowSchool" value={school} onChange={e=>{setSchool(e.target.value);setClassId('');setPlanId('')}}>{memberships.map(m=><option key={m.school_id} value={m.school_id}>{schoolNames[m.school_id]||'Школа '+m.school_id.slice(0,8)+'…'}</option>)}</select></div><div><label htmlFor="flowClass">Мой класс</label><select id="flowClass" value={classId} onChange={e=>{setClassId(e.target.value);setPlanId('')}}>{availableClasses.map(c=><option key={c.id} value={c.id}>{c.label} · {c.academic_year}</option>)}</select></div></div>
  <label htmlFor="flowPlan">КТП</label><select id="flowPlan" value={planId} onChange={e=>setPlanId(e.target.value)}><option value="">Выберите КТП</option>{plans.map(p=><option key={p.id} value={p.id}>{p.subject} · редакция {p.revision}</option>)}</select>
- {!plans.length?<p className="warning">Для класса пока нет серверного КТП. Создайте его в разделе материалов главного кабинета.</p>:selectedPlan&&<><p className="muted">В КТП строк: {candidates.rows.length}. В реестре тем: {currentTopics.length}. Связанные уроки: {drafts.filter(d=>currentTopics.some(t=>t.id===d.curriculum_topic_id)).length}.</p>
+ {!plans.length?<p className="warning">Для класса пока нет серверного КТП. Откройте главный кабинет → раздел «КТП / КСП» → выберите КТП. Можно подставить учебный пример для 10 класса, проверить его и сохранить. Затем вернитесь сюда и синхронизируйте темы.</p>:selectedPlan&&<><p className="muted">В КТП строк: {candidates.rows.length}. В реестре тем: {currentTopics.length}. Связанные уроки: {drafts.filter(d=>currentTopics.some(t=>t.id===d.curriculum_topic_id)).length}.</p>
  {candidates.error&&<p className="error">{candidates.error}</p>}
  <div className="actions"><button type="button" className="btn primary" disabled={busy||matches||!!candidates.error||!candidates.rows.length||(hasLinks&&!matches)} onClick={()=>void synchronize()}>{busy?'Сохранение…':matches?'КТП согласован':'Согласовать темы КТП'}</button><button type="button" className="btn" disabled={busy} onClick={()=>setTick(x=>x+1)}>Перечитать базу</button></div>
  {hasLinks&&!matches&&<p className="warning">К КТП привязаны материалы. Для изменения состава тем нужна контролируемая процедура обновления связей.</p>}
