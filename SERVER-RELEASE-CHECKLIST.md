@@ -6,7 +6,7 @@
 - `backend/pilot-app/components/TeacherMaterials.tsx`: импортированное КТП **только подставляется в локальный редактор** назначенного учителя. Неизменяемые классы и права доступа не меняются; сохранение в Supabase выполняется лишь по явному нажатию «Создать на сервере».
 - `tests/curriculum-csv.test.mjs`: проверены заголовки во второй строке, UTF-8, CSV с кавычками, TSV, неверные даты, часы и отсутствие автоматических запросов к серверу. Первая попытка CI выявила ошибку определения разделителя, она исправлена.
 - [GitHub Actions: все три проверки завершены успешно](https://github.com/gulyantsdanil-oss/m-academy/actions/runs/45957015780): `pilot-validation`, `container-smoke`, `postgres-migration-smoke`.
-- Vercel deployment `dpl_GcoCKZtyn82dE9faFAhF1p542PH5` начат для `https://m-academy-pilot.vercel.app`; статус нужно проверить до заявления об успешной публикации.
+- Vercel deployment `dpl_GcoCKZtyn82dE9faFAhF1p542PH5` получил статус **READY** и основной alias `https://m-academy-pilot.vercel.app`.
 - Реальный учительский сеанс и сохранение импортированного КТП с действующей ролью `teacher` в браузере пока не подтверждены.
 
 ## Учительский старт КТП для 10Г — 27 ноября 2026
