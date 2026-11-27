@@ -5,12 +5,15 @@ import {getSupabase} from '@/lib/supabase';
 import type {ClassRoom,Membership} from '@/lib/types';
 
 type Roster={class_id:string;teacher_id?:string;student_id?:string;subject?:string};
+type MemberLabel={user_id:string;display_name:string;member_role:string};
 const sb=getSupabase();
 const short=(x:string)=>x.slice(0,8)+'…';
 
 export default function AdminRoster(){
  const [uid,setUid]=useState('');
  const [schools,setSchools]=useState<string[]>([]);
+ const [schoolNames,setSchoolNames]=useState<Record<string,string>>({});
+ const [memberLabels,setMemberLabels]=useState<Record<string,string>>({});
  const [school,setSchool]=useState('');
  const [classes,setClasses]=useState<ClassRoom[]>([]);
  const [members,setMembers]=useState<(Membership&{user_id:string})[]>([]);
@@ -40,6 +43,10 @@ export default function AdminRoster(){
    if(memberships.error){setError(memberships.error.message);setReady(true);return}
    const ids=(memberships.data||[]).map(m=>m.school_id as string);
    setSchools(ids);setSchool(ids[0]||'');
+   if(ids.length){
+    const visible=await sb.from('schools').select('id,name').in('id',ids);
+    if(active&&!visible.error)setSchoolNames(Object.fromEntries((visible.data||[]).map(x=>[x.id as string,x.name as string])));
+   }
    if(!ids.length)setError('Этот аккаунт не назначен администратором школы.');
    setReady(true);
   })();
@@ -51,17 +58,20 @@ export default function AdminRoster(){
   let active=true;
   (async()=>{
    setError('');
-   const [cr,mr,tr,sr]=await Promise.all([
+   const [cr,mr,tr,sr,dr]=await Promise.all([
     sb.from('classes').select('id,school_id,label,academic_year').eq('school_id',school).order('label').limit(500),
     sb.from('memberships').select('school_id,user_id,role,active').eq('school_id',school).eq('active',true).limit(1000),
     sb.from('class_teachers').select('class_id,teacher_id,subject').eq('school_id',school).limit(1000),
-    sb.from('class_students').select('class_id,student_id').eq('school_id',school).limit(1000)
+    sb.from('class_students').select('class_id,student_id').eq('school_id',school).limit(1000),
+    sb.rpc('admin_school_directory',{p_school:school})
    ]);
    if(!active)return;
-   const failure=[cr,mr,tr,sr].find(x=>x.error)?.error;
+   const failure=[cr,mr,tr,sr,dr].find(x=>x.error)?.error;
    if(failure){setError(failure.message);return}
    const cl=(cr.data||[]) as ClassRoom[];
    setClasses(cl);setMembers((mr.data||[]) as (Membership&{user_id:string})[]);
+   const labels=(dr.data||[]) as MemberLabel[];
+   setMemberLabels(Object.fromEntries(labels.map(v=>[v.user_id,v.display_name])));
    setTeachers((tr.data||[]) as Roster[]);setStudents((sr.data||[]) as Roster[]);
    setClassId(v=>cl.some(c=>c.id===v)?v:cl[0]?.id||'');
   })();
@@ -75,6 +85,7 @@ export default function AdminRoster(){
  const selectedStudent=studentsAvailable.some(m=>m.user_id===studentId)?studentId:studentsAvailable[0]?.user_id||'';
  const linkedTeachers=teachers.filter(r=>r.class_id===chosen);
  const linkedStudents=students.filter(r=>r.class_id===chosen);
+ const memberName=(id:string)=>memberLabels[id]||'Участник '+short(id);
 
  async function assign(event:FormEvent,kind:'teacher'|'student'){
   event.preventDefault();if(!sb||busy||!school||!chosen)return;
@@ -113,34 +124,34 @@ export default function AdminRoster(){
  <nav className="actions"><Link href="/">Кабинет</Link><Link href="/overview">Панель</Link><Link href="/classes">Классы</Link><Link href="/help">Помощь</Link></nav></div></header>
  <main className="container"><h1>Участники классов</h1>
  <p className="muted">Администратор назначает только уже созданные учётные записи с действующими ролями. Создание аккаунтов и назначение школьных ролей остаются в защищённой административной процедуре.</p>
- <div className="warning">Пилотная функция для тестовых аккаунтов взрослых. Идентификаторы показаны сокращённо, поэтому перед назначением требуется сверка с доверенным списком участников. Не вводите здесь реальные данные учащихся.</div>
+ <div className="warning">Пилотная функция для тестовых аккаунтов взрослых. Имена являются справочной информацией, а права проверяются по подтверждённым идентификаторам Supabase. Перед назначением сверьте участника с доверенным списком. Не вводите реальные данные учащихся.</div>
  {!ready&&<p>Проверка полномочий…</p>}
  {error&&<p className="error" role="alert">{error}</p>}{message&&<p className="success" role="status">{message}</p>}
  {!!schools.length&&<section className="card"><div className="grid">
  <div><label htmlFor="rosterSchool">Школа</label><select id="rosterSchool" value={school} onChange={e=>{setSchool(e.target.value);setTeacherId('');setStudentId('')}}>
- {schools.map(id=><option value={id} key={id}>{short(id)}</option>)}</select></div>
+ {schools.map(id=><option value={id} key={id}>{schoolNames[id]||'Школа '+short(id)}</option>)}</select></div>
  <div><label htmlFor="rosterClass">Класс</label><select id="rosterClass" value={chosen} onChange={e=>setClassId(e.target.value)}>
  {classes.map(c=><option value={c.id} key={c.id}>{c.label} · {c.academic_year}</option>)}</select></div></div>
  {!classes.length&&<p className="muted">Нет классов. Администратор может создать класс в главном кабинете.</p>}</section>}
  {!!school&&!!chosen&&<div className="grid"><section className="card"><h2>Педагоги класса</h2>
  <p className="muted">Назначений: {linkedTeachers.length}</p>
  {linkedTeachers.map((r,i)=><div className="item" key={r.teacher_id+'-'+r.subject+'-'+i}>
- <b>{short(r.teacher_id||'')}</b> · {r.subject}
+ <b>{memberName(r.teacher_id||'')}</b> · {r.subject}
  <button className="btn" type="button" disabled={busy} onClick={()=>void unassign('teacher',r)}>Снять назначение</button>
  </div>)}
  <form onSubmit={e=>void assign(e,'teacher')}>
- <label htmlFor="rosterTeacher">Учитель (проверенный ID)</label><select id="rosterTeacher" value={selectedTeacher} onChange={e=>setTeacherId(e.target.value)}>
- {teachersAvailable.map(m=><option key={m.user_id} value={m.user_id}>{short(m.user_id)}</option>)}</select>
+ <label htmlFor="rosterTeacher">Учитель (проверенный аккаунт)</label><select id="rosterTeacher" value={selectedTeacher} onChange={e=>setTeacherId(e.target.value)}>
+ {teachersAvailable.map(m=><option key={m.user_id} value={m.user_id}>{memberName(m.user_id)} · {short(m.user_id)}</option>)}</select>
  <label htmlFor="rosterSubject">Предмет</label><input id="rosterSubject" value={subject} maxLength={100} onChange={e=>setSubject(e.target.value)}/>
  <button className="btn primary" disabled={busy||!teachersAvailable.length} type="submit">Назначить учителя</button></form>
  </section><section className="card"><h2>Ученики класса</h2>
  <p className="muted">Назначений: {linkedStudents.length}</p>
  {linkedStudents.map(r=><div className="item" key={r.student_id}>
- <b>{short(r.student_id||'')}</b>
+ <b>{memberName(r.student_id||'')}</b>
  <button className="btn" type="button" disabled={busy} onClick={()=>void unassign('student',r)}>Исключить из класса</button></div>)}
  <form onSubmit={e=>void assign(e,'student')}>
- <label htmlFor="rosterStudent">Ученик (тестовый ID)</label><select id="rosterStudent" value={selectedStudent} onChange={e=>setStudentId(e.target.value)}>
- {studentsAvailable.map(m=><option key={m.user_id} value={m.user_id}>{short(m.user_id)}</option>)}</select>
+ <label htmlFor="rosterStudent">Ученик (тестовый аккаунт)</label><select id="rosterStudent" value={selectedStudent} onChange={e=>setStudentId(e.target.value)}>
+ {studentsAvailable.map(m=><option key={m.user_id} value={m.user_id}>{memberName(m.user_id)} · {short(m.user_id)}</option>)}</select>
  <button className="btn primary" disabled={busy||!studentsAvailable.length} type="submit">Добавить ученика</button></form>
  </section></div>}</main></>;
 }
