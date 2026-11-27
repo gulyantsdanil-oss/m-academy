@@ -18,6 +18,16 @@ const defaultKsp=()=>({fields:{school:'',teacher:'',section:'',date:'',grade:'',
  {title:'Завершение',minutes:5,teacher:'',student:'',evaluation:'',resources:''}
 ]});
 const defaultKtp=()=>({grade:'',subject:'Математика',year:'2026-2027',rows:[{topic:'',hours:1,date:''}]});
+// A small synthetic lesson sequence for an adult-only pilot. Never writes to Supabase
+// until the assigned teacher reviews and explicitly saves the document.
+const exampleKtp10=()=>({
+ grade:'10',subject:'Алгебра и начала анализа',year:'2026-2027',
+ rows:[
+  {topic:'Простейшие тригонометрические уравнения',hours:2,date:'',goals:'Находить общие решения sin x = a, cos x = a; проверять ОДЗ и периодичность.'},
+  {topic:'Методы решения тригонометрических уравнений',hours:2,date:'',goals:'Применять разложение на множители, замену переменной и формулы тригонометрии.'},
+  {topic:'Простейшие тригонометрические неравенства',hours:2,date:'',goals:'Решать неравенства с sin x и cos x на тригонометрическом круге.'}
+ ]
+});
 function validMaterial(kind:Kind,v:unknown):v is Record<string,unknown>{
  if(!jsonObject(v)||new TextEncoder().encode(JSON.stringify(v)).length>MAX_BYTES)return false;
  if(kind==='ksp')return jsonObject(v.fields)&&Array.isArray(v.phases)&&v.phases.length<=100&&
@@ -131,6 +141,15 @@ export function TeacherMaterials({
   setEditor(stringify(nextKind==='ksp'?defaultKsp():defaultKtp()));
   setError('');setMessage('');
  }
+ function loadExampleKtp(){
+  if(kind!=='ktp'||!currentClass||busy)return;
+  if(selected&& !window.confirm('Заменить содержимое редактора примером? Сохранённый на сервере документ не изменится.'))return;
+  setSelected('');setRevision(null);setCurriculumTopicId('');
+  setTitle('Алгебра и начала анализа');
+  setEditor(stringify(exampleKtp10()));
+  setMessage('Тестовые 3 темы загружены только в редактор. Проверьте класс, часы и цели; данные не отправлены на сервер.');
+  setError('');
+ }
  function pick(id:string){
   if(!id){clearEditor();return}
   const doc=docs.find(d=>d.id===id);if(!doc)return;
@@ -218,6 +237,11 @@ export function TeacherMaterials({
     <option value="">Новый документ</option>
     {docs.map(d=><option key={d.id} value={d.id}>{kind==='ksp'?d.topic:d.subject} · редакция {d.revision}</option>)}
    </select>
+   {kind==='ktp'&&<div className="card">
+    <h3>Быстрый старт: пример КТП для 10 класса</h3>
+    <p className="muted">Три учебные темы по тригонометрии. Пример не является официальным КТП и не сохраняется автоматически.</p>
+    <button type="button" className="btn" disabled={busy} onClick={loadExampleKtp}>Подставить 3 тестовые темы (без сохранения)</button>
+   </div>}
    <form onSubmit={e=>void save(e)}>
     {kind==='ksp'&&<><label htmlFor="matCurriculum">Связь с темой КТП</label>
     <select id="matCurriculum" value={curriculumTopicId} disabled={!!selected} onChange={e=>{
