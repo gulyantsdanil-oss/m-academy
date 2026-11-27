@@ -1,3 +1,10 @@
+## Google OAuth — параметры готовы, активация ждёт настройки провайдера (27.11.2026)
+
+- [Точная конфигурация Google Cloud и Supabase](GOOGLE-OAUTH-ACTIVATION.md): Google Authorized Redirect URI `https://ohwjlvcahzjktdqgridm.supabase.co/auth/v1/callback`, Supabase Site URL `https://m-academy-pilot.vercel.app/`.
+- В пилотном Next.js есть `signInWithOAuth({provider:'google'})` и диагностика `/auth-check`, а в Vercel есть публичные переменные для связи с тестовой базой.
+- Подключённые инструменты Supabase предоставляют доступ к PostgreSQL, ключам и миграциям, но **не предоставляют прямую запись в Authentication → Providers и URL Configuration**. Существование и включение Google OAuth Client нельзя утверждать без подтверждённого изменения в Google Cloud/Supabase Dashboard.
+- До проверки безопасного Google-входа, связывания идентичностей и RLS под разными аккаунтами сайт не готов к подключению учеников.
+
 ## Подключение тестового Supabase к Vercel — 27 ноября 2026
 
 - Подтверждён действующий тестовый проект Supabase `m-academy-test` (ref `ohwjlvcahzjktdqgridm`), статус `ACTIVE_HEALTHY`, PostgreSQL 17.
