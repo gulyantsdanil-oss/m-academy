@@ -60,7 +60,10 @@ export function parseCurriculumCsv(text){
  if(text.length>1000000)throw Error('Таблица превышает 1 МБ.');
  let picked=null;
  for(const delimiter of [';','\t',',']){
-  const grid=parseGrid(text,delimiter);
+  // A file with comma separators can contain quote marks that look invalid
+  // when interpreted as semicolon-separated. Try the next separator first.
+  let grid;
+  try{grid=parseGrid(text,delimiter)}catch{continue}
   const rowNum=grid.findIndex((r,i)=>i<5&&'topic' in fields(r)&&'hours' in fields(r));
   if(rowNum>=0){picked={grid,delimiter,rowNum};break}
  }
