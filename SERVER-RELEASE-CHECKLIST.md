@@ -6,7 +6,7 @@
 - В Vercel проекте `m-academy-pilot` сохранены для `production` и `preview` переменные `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и `PILOT_SITE_URL`. Использован **публичный publishable API key**, никакие `service_role` или Google OAuth Client Secret не передавались в браузер.
 - Supabase Security Advisor обнаружил унаследованную функцию `public.rls_auto_enable()`, доступную `anon`/`authenticated`. Отозвано право `EXECUTE` у `PUBLIC`, `anon` и `authenticated` миграцией `revoke_public_rls_helper_20261127`; после исправления замечание исчезло.
 - Остались предупреждения Security Advisor: две разрешённые авторизованным пользователям SECURITY DEFINER RPC для преподавательских документов/ответов и отключённая leaked-password protection. Функции необходимо отдельно аудировать перед настоящим использованием школьниками; предупреждения не означают автоматически подтверждённую уязвимость.
-- После изменения переменных начата пересборка Vercel deployment `dpl_2i9swrfoNfUcf1bqDpuFHCTjk96a`. Реальный Google OAuth Provider, адреса разрешённых redirect URL и вход трёх взрослых тестовых аккаунтов ещё не подтверждены. Vercel Deployment Protection остаётся включённой.
+- После изменения переменных успешно завершена пересборка Vercel deployment `dpl_2i9swrfoNfUcf1bqDpuFHCTjk96a` со статусом **READY** и рабочим alias `https://m-academy-pilot.vercel.app`. Реальный Google OAuth Provider, адреса разрешённых redirect URL и вход трёх взрослых тестовых аккаунтов ещё не подтверждены. Vercel Deployment Protection остаётся включённой.
 
 ## Реальное развёртывание Vercel — 26 ноября 2026
 
