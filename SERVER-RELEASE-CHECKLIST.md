@@ -1,3 +1,13 @@
+## Подключение тестового Supabase к Vercel — 27 ноября 2026
+
+- Подтверждён действующий тестовый проект Supabase `m-academy-test` (ref `ohwjlvcahzjktdqgridm`), статус `ACTIVE_HEALTHY`, PostgreSQL 17.
+- В базе уже были базовые школьные таблицы, включая одну тестовую школу и два назначения. **Повторное применение исходных ранних миграций не выполнялось**, чтобы не повредить существующие данные.
+- Последовательно применены четыре недостающие миграции из репозитория: `curriculum_flow_20261126`, `atomic_curriculum_sync_20261126`, `atomic_assignment_publish_20261126`, `roster_roles_20261126`. После них `public.curriculum_topics` существует, и все 15 обнаруженных учебных таблиц имеют включённый RLS.
+- В Vercel проекте `m-academy-pilot` сохранены для `production` и `preview` переменные `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и `PILOT_SITE_URL`. Использован **публичный publishable API key**, никакие `service_role` или Google OAuth Client Secret не передавались в браузер.
+- Supabase Security Advisor обнаружил унаследованную функцию `public.rls_auto_enable()`, доступную `anon`/`authenticated`. Отозвано право `EXECUTE` у `PUBLIC`, `anon` и `authenticated` миграцией `revoke_public_rls_helper_20261127`; после исправления замечание исчезло.
+- Остались предупреждения Security Advisor: две разрешённые авторизованным пользователям SECURITY DEFINER RPC для преподавательских документов/ответов и отключённая leaked-password protection. Функции необходимо отдельно аудировать перед настоящим использованием школьниками; предупреждения не означают автоматически подтверждённую уязвимость.
+- После изменения переменных начата пересборка Vercel deployment `dpl_2i9swrfoNfUcf1bqDpuFHCTjk96a`. Реальный Google OAuth Provider, адреса разрешённых redirect URL и вход трёх взрослых тестовых аккаунтов ещё не подтверждены. Vercel Deployment Protection остаётся включённой.
+
 ## Реальное развёртывание Vercel — 26 ноября 2026
 
 - В подтверждённой рабочей области Vercel создан проект `m-academy-pilot`, ID `prj_8xMziRmmdlu4NVvsRZf39lkkVE09`, runtime Next.js / Node.js 22.
