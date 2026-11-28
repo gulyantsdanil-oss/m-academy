@@ -1,5 +1,5 @@
-import {SiteHeader} from '@/components/SiteHeader';
 'use client';
+import {SiteHeader} from '@/components/SiteHeader';
 import {useCallback,useEffect,useMemo,useState,type FormEvent} from 'react';
 import Link from 'next/link';
 import {getSupabase} from '@/lib/supabase';
