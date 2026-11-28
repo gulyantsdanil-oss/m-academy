@@ -1,3 +1,4 @@
+import {SiteHeader} from '@/components/SiteHeader';
 'use client';
 import {useEffect,useMemo,useState} from 'react';
 import Link from 'next/link';
@@ -85,8 +86,8 @@ export default function OverviewPage(){
  },[identity,active,reload]);
  const ownClasses=snapshot.classes;
  const countPublished=snapshot.assignments.filter(a=>a.published).length;
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">4.0 · Secure pilot</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/curriculum">КТП → уроки</Link><Link href="/lessons">Редактор уроков</Link><Link href="/classes">Классы</Link><Link href="/admin/roster">Участники классов</Link><Link href="/assignments">Задания</Link><Link href="/results">Результаты</Link><Link href="/help">Помощь</Link></nav></div></header>
- <main className="container">
+ return <><SiteHeader />
+ <main className="container inner-main">
   <h1>Единая рабочая панель 4.0</h1><p className="muted">Классы, КТП, документы и задания из одной базы. Состав данных ограничивается действующей ролью и политиками доступа Supabase.</p>
   <div className="warning"><b>Не для реальных данных детей до проверки безопасности.</b> Серверный пилот требует развёртывания, проверки RLS, соответствия требованиям хранения данных и резервного копирования. Публичный GitHub Pages не подключён к этому серверу.</div>
   {loading&&<p role="status">Проверка сеанса и ролей…</p>}
