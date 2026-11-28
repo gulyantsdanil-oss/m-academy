@@ -1,3 +1,4 @@
+import {SiteHeader} from '@/components/SiteHeader';
 'use client';
 import {useCallback,useEffect,useState} from 'react';
 import Link from 'next/link';
@@ -51,9 +52,8 @@ export default function AuthCheck(){
  },[]);
  useEffect(()=>{void verify()},[verify]);
  const labels:Record<Role,string>={admin:'Администратор',teacher:'Учитель',student:'Ученик'};
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">Проверка входа</small></div>
- <nav className="actions"><Link href="/">Кабинет</Link><Link href="/help">Помощь</Link><Link href="/admin/roster">Участники</Link></nav></div></header>
- <main className="container"><h1>Диагностика Google-входа и ролей</h1>
+ return <><SiteHeader />
+ <main className="container inner-main"><h1>Диагностика Google-входа и ролей</h1>
  <p className="muted">Проверка использует текущий сеанс Supabase и реальные ограничения доступа базы. Она не обращается к Firebase ECO CLUB, не импортирует пользователей и не выдаёт новые права.</p>
  <div className="warning">Только тестовые аккаунты взрослых. Статус на этой странице не подтверждает настройку внешнего Google OAuth, пока приложение не развернуто и вход не пройден в браузере.</div>
  {phase==='loading'&&<p role="status">Проверка входа…</p>}
