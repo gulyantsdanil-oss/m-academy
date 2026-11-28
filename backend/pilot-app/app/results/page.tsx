@@ -1,3 +1,4 @@
+import {SiteHeader} from '@/components/SiteHeader';
 'use client';
 import {useEffect,useMemo,useState} from 'react';
 import Link from 'next/link';
@@ -95,7 +96,7 @@ export default function ResultsPage(){
   return {assigned:assignments.length,submitted:submissions.length,checked:submissions.filter(s=>graded.has(s.id)).length};
  },[assignments,submissions,grades]);
  const schoolName=(classId:string)=>classes.find(c=>c.id===classId)?.label||'Класс';
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">4.1 · результаты</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/overview">Панель</Link><Link href="/curriculum">КТП</Link><Link href="/assignments">Задания</Link></nav></div></header><main className="container">
+ return <><SiteHeader /><main className="container inner-main">
  <h1>{student?'Мои результаты':'Контроль выполненных работ'}</h1>
  <p className="muted">Сведения читаются из защищённой базы и проверяются правилами доступа. Отображаются максимум 100 последних заданий и 1000 работ — это не полная общешкольная статистика.</p>
  <div className="warning">Пилотный модуль. Для работы с реальными учащимися требуется предварительная проверка безопасности, требований обработки данных и серверной инфраструктуры.</div>
