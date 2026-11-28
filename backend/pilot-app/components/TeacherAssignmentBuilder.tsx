@@ -31,9 +31,26 @@ export function TeacherAssignmentBuilder({
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState('');
  const [message,setMessage]=useState('');
+ const [incoming,setIncoming]=useState({classId:'',topicId:''});
+ useEffect(()=>{
+  const search=new URLSearchParams(window.location.search);
+  const classId=search.get('classId')||'',topicId=search.get('curriculumTopicId')||'';
+  if(/^[0-9a-f-]{36}$/i.test(classId)&&/^[0-9a-f-]{36}$/i.test(topicId))setIncoming({classId,topicId});
+ },[]);
  const permitted=new Set(assignments.map(x=>x.class_id));
  const options=classes.filter(x=>permitted.has(x.id));
  const chosen=options.some(x=>x.id===classId)?classId:options[0]?.id||'';
+ useEffect(()=>{
+  if(incoming.classId&&options.some(x=>x.id===incoming.classId))setClassId(incoming.classId);
+ },[incoming.classId,assignments,classes]);
+ useEffect(()=>{
+  if(!incoming.topicId||incoming.classId!==chosen)return;
+  const matched=curriculumTopics.find(t=>t.id===incoming.topicId&&t.class_id===chosen);
+  if(!matched)return;
+  setTopicId(matched.id);setTopic(matched.topic);
+  setMessage('Выбрана тема из КТП. Добавьте вопросы и проверьте ответы перед публикацией.');
+  setIncoming({classId:'',topicId:''});
+ },[incoming,chosen,curriculumTopics]);
  useEffect(()=>{
   const sb=getSupabase();
   if(!sb||!chosen){setCurriculumTopics([]);setTopicId('');return}
