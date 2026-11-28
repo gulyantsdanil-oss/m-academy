@@ -101,6 +101,16 @@ export default function OverviewPage(){
   </div>
   <div className="grid"><section className="card"><h2>Мои классы</h2>{ownClasses.length===0?<p className="muted">Назначенных классов нет.</p>:ownClasses.map(c=><div className="item" key={c.id}><b>{c.label}</b> · {c.academic_year}{active.membership.role==='teacher'&&<p className="muted">{snapshot.teachers.filter(t=>t.class_id===c.id).map(t=>t.subject).join(', ')}</p>}</div>)}<p><Link href="/classes">Открыть классы →</Link></p></section>
   <section className="card"><h2>Последние задания</h2>{!snapshot.assignments.length?<p className="muted">Нет доступных работ.</p>:snapshot.assignments.slice(0,8).map(a=><div className="item" key={a.id}><Link href={'/assignments/'+a.id}><b>{a.topic}</b></Link><p className="muted">{nameFor(ownClasses,a.class_id)} · {a.published?'Опубликовано':'Черновик'}</p></div>)}<p><Link href="/assignments">Все задания →</Link></p></section></div>
+  {active.membership.role==='teacher'&&<section className="card">
+   <h2>Подготовка урока — три шага</h2>
+   <p className="muted">Начните с КТП, свяжите тему с уроком и подготовьте задания. Каждое действие проверяется правами вашего аккаунта.</p>
+   <div className="teacher-workflow">
+    <Link href="/"><b>01 · Загрузить КТП</b><small>Откройте редактор КТП / КСП, импортируйте Excel или создайте план вручную.</small></Link>
+    <Link href="/curriculum"><b>02 · Выбрать тему</b><small>Согласуйте темы и создайте черновик связанного урока.</small></Link>
+    <Link href="/lessons"><b>03 · Подготовить урок</b><small>Заполните этапы и оценивание, сохраните новую редакцию.</small></Link>
+   </div>
+   <p><Link href="/curriculum">Перейти к планированию →</Link></p>
+  </section>}
   {active.membership.role==='teacher'&&<div className="grid"><section className="card"><h2>КТП и проекты уроков</h2><p>Сохранённых КТП: <strong>{snapshot.plans.length}</strong></p><p>Черновиков уроков: <strong>{snapshot.drafts.length}</strong></p>{snapshot.plans.slice(0,6).map(p=><div key={p.id} className="item">{nameFor(ownClasses,p.class_id)} · {p.subject}<small className="muted"> · редакция {p.revision}</small></div>)}<p className="muted">Редактирование КТП и КСП доступно на главной странице серверного кабинета.</p></section>
   <section className="card"><h2>КСП</h2><p>Документов: <strong>{snapshot.ksp.length}</strong></p>{snapshot.ksp.slice(0,7).map(k=><div key={k.id} className="item"><b>{k.topic}</b><p className="muted">{nameFor(ownClasses,k.class_id)} · редакция {k.revision}</p></div>)}</section></div>}
   {active.membership.role==='admin'&&<section className="card"><h2>Администрирование</h2><p className="muted">Сводка ограничена доступными классами и заданиями. Назначения ролей выполняются через доверенный административный процесс, не переключением роли в браузере.</p><Link href="/">Управление учебными классами →</Link></section>}
