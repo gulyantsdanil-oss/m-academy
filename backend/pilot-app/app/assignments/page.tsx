@@ -1,3 +1,4 @@
+import {SiteHeader} from '@/components/SiteHeader';
 'use client';
 import Link from 'next/link';
 import {useEffect,useState} from 'react';
@@ -36,8 +37,8 @@ export default function AssignmentsIndex(){
   })();
   return()=>{live=false};
  },[]);
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">Задания</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/classes">Классы</Link><Link href="/help">Помощь</Link></nav></div></header>
- <main className="container"><h1>{role==='student'?'Мои задания':'Задания школы'}</h1>
+ return <><SiteHeader />
+ <main className="container inner-main"><h1>{role==='student'?'Мои задания':'Задания школы'}</h1>
  <p className="muted">Список определяется правами текущего аккаунта в Supabase. Ключи ответов ученикам не показываются.</p>
  {loading&&<p>Загрузка…</p>}{error&&<p className="error" role="alert">{error}</p>}
  {!loading&&role&&<section className="card"><h2>Доступные задания ({items.length})</h2>
