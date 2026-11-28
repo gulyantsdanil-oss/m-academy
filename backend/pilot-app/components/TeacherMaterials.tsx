@@ -4,6 +4,7 @@ import {getSupabase} from '@/lib/supabase';
 import type {ClassRoom,TeacherAssignment} from '@/lib/types';
 import {MaterialForm} from '@/components/MaterialForm';
 import {parseCurriculumCsv} from '@/lib/curriculum-csv.mjs';
+import {parseCurriculumSheet} from '@/lib/curriculum-xlsx.mjs';
 
 type Kind='ksp'|'ktp';
 type Material={id:string;school_id:string;class_id:string;teacher_id:string;revision:number;updated_at:string;content:Record<string,unknown>;topic?:string;subject?:string;curriculum_topic_id?:string|null};
@@ -157,10 +158,18 @@ export function TeacherMaterials({
   event.target.value='';
   if(!file||busy||!currentClass)return;
   setError('');setMessage('');
-  if(file.size>1000000){setError('CSV превышает 1 МБ.');return}
-  if(!/\.(csv|tsv)$/i.test(file.name)){setError('Поддерживаются только CSV и TSV. Файлы XLSX пока нужно экспортировать в CSV UTF-8.');return}
+  if(file.size>2*1024*1024){setError('Файл превышает 2 МБ.');return}
+  if(!/\.(csv|tsv|xlsx)$/i.test(file.name)){setError('Поддерживаются Excel XLSX, CSV и TSV.');return}
   try{
-   const parsed=parseCurriculumCsv(await file.text());
+   let parsed;
+   if(/\.xlsx$/i.test(file.name)){
+    // Browser-side parsing only. No upload. Load the reader on demand.
+    const {readSheet}=await import('read-excel-file/browser');
+    const grid=await readSheet(file);
+    parsed=parseCurriculumSheet(grid);
+   }else{
+    parsed=parseCurriculumCsv(await file.text());
+   }
    const chosen=permitted.find(c=>c.id===currentClass);
    const grade=/^\d{1,2}/.exec(chosen?.label||'')?.[0]||'';
    const data={grade,subject:'Математика',year:chosen?.academic_year||'2026-2027',rows:parsed.rows};
@@ -168,8 +177,8 @@ export function TeacherMaterials({
    setKind('ktp');setSelected('');setRevision(null);setCurriculumTopicId('');
    setTitle('Математика');setEditor(stringify(data));
    setCsvPreview(parsed.rows.length);
-   setMessage('CSV прочитан: '+parsed.rows.length+' тем (заголовки в строке '+parsed.headerLine+'). Данные только в редакторе — проверьте и нажмите «Создать на сервере».');
-  }catch(err){setCsvPreview(0);setError(err instanceof Error?err.message:'Ошибка чтения CSV')}
+   setMessage('Таблица прочитана: '+parsed.rows.length+' тем (заголовки в строке '+parsed.headerLine+'). Данные только в редакторе — проверьте и нажмите «Создать на сервере».');
+  }catch(err){setCsvPreview(0);setError(err instanceof Error?err.message:'Ошибка чтения таблицы')}
  }
  function pick(id:string){
   if(!id){clearEditor();return}
@@ -259,10 +268,10 @@ export function TeacherMaterials({
     {docs.map(d=><option key={d.id} value={d.id}>{kind==='ksp'?d.topic:d.subject} · редакция {d.revision}</option>)}
    </select>
    <section className="card">
-    <h3>Импорт КТП из Excel (CSV / TSV)</h3>
-    <p className="muted">В Excel выберите «Сохранить как → CSV UTF-8». Поддерживаются столбцы «Тема», «Часы», необязательные «Дата», «Цели обучения». Заголовки могут находиться во второй строке. Файл обрабатывается на устройстве, без автоматической отправки.</p>
-    <label htmlFor="ktpCsvImport">Выбрать CSV или TSV (до 1 МБ, максимум 1000 тем)</label>
-    <input id="ktpCsvImport" type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values" disabled={busy} onChange={e=>void importCsv(e)}/>
+    <h3>Импорт КТП из Excel (.xlsx / CSV / TSV)</h3>
+    <p className="muted">Загрузите файл Excel .xlsx непосредственно или сохраните таблицу как CSV UTF-8. Читается первый лист Excel. Поддерживаются столбцы «Тема», «Часы», необязательные «Дата», «Цели обучения». Заголовки могут находиться во второй строке. Файл обрабатывается на устройстве, без автоматической отправки.</p>
+    <label htmlFor="ktpCsvImport">Выбрать XLSX, CSV или TSV (до 2 МБ, максимум 1000 тем)</label>
+    <input id="ktpCsvImport" type="file" accept=".xlsx,.csv,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/tab-separated-values" disabled={busy} onChange={e=>void importCsv(e)}/>
     {csvPreview>0&&<p className="success" role="status">В редакторе: {csvPreview} тем. Перед сохранением проверьте предмет, класс, часы и цели.</p>}
    </section>
    {kind==='ktp'&&<div className="card">
