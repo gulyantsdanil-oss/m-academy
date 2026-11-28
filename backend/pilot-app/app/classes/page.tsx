@@ -1,3 +1,4 @@
+import {SiteHeader} from '@/components/SiteHeader';
 'use client';
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
@@ -44,8 +45,8 @@ export default function ClassesPage(){
   return()=>{alive=false};
  },[]);
  const allowed=classes.filter(c=>view?.role==='admin'||(view?.role==='teacher'&&subjects.some(s=>s.class_id===c.id))||(view?.role==='student'&&enrollments.some(e=>e.class_id===c.id)));
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">Классы</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/assignments">Задания</Link><Link href="/help">Помощь</Link></nav></div></header>
- <main className="container"><h1>Мои классы</h1><p className="muted">Список доступен по назначенной роли и ограничениям Supabase.</p>
+ return <><SiteHeader />
+ <main className="container inner-main"><h1>Мои классы</h1><p className="muted">Список доступен по назначенной роли и ограничениям Supabase.</p>
  {loading&&<p>Загружаем классы…</p>}{error&&<p className="error" role="alert">{error}</p>}
  {view&&<><p className="tag">{view.schoolName} · {view.role}</p>
  <section className="card"><h2>Доступные классы ({allowed.length})</h2>
