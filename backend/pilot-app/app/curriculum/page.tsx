@@ -142,7 +142,7 @@ export default function CurriculumPage(){
   }catch(e){setError(e instanceof Error?e.message:'Ошибка создания урока')}finally{setBusy(false)}
  }
  return <><SiteHeader />
- <main className="container inner-main"><h1>Связанные учебные материалы</h1><p className="muted">Каждая тема получает постоянный идентификатор в базе. Уроки и задания могут ссылаться на него без поиска по названию.</p>
+ <main className="container inner-main"><h1>КТП → урок → задание</h1><p className="muted">Каждая тема получает постоянный идентификатор в базе. Уроки и задания могут ссылаться на него без поиска по названию.</p>
  <div className="warning"><b>Пилотная функция.</b> Не используйте реальные данные учащихся до завершения проверки безопасности. КТП сначала сохраняется педагогом в серверном редакторе, затем темы синхронизируются отдельной кнопкой. Реальные данные учеников не используйте.</div>
  {!ready&&<p>Проверка доступа…</p>}
  {error&&<p role="alert" className="error">{error}</p>}{message&&<p role="status" className="success">{message}</p>}
@@ -155,6 +155,13 @@ export default function CurriculumPage(){
  <div className="card"><h2>Темы и связанные материалы</h2>{!currentTopics.length?<p className="muted">Сначала синхронизируйте темы.</p>:currentTopics.map(t=>{
  const linkedDrafts=drafts.filter(d=>d.curriculum_topic_id===t.id),linkedKsp=ksp.filter(d=>d.curriculum_topic_id===t.id),linkedAssignments=assignments.filter(a=>a.curriculum_topic_id===t.id);
  return <div key={t.id} className="item"><div><b>{t.position}. {t.topic}</b> <span className="tag">{t.hours} ч.</span></div><p className="muted">{t.goals||'Цель не указана'}{t.scheduled_on?' · '+t.scheduled_on:''}</p>
- <p className="muted">Уроков: {linkedDrafts.length}. КСП: {linkedKsp.length}. Заданий: {linkedAssignments.length}.</p><div className="actions"><button className="btn" disabled={busy||!!linkedDrafts.length} onClick={()=>void createLesson(t)}>{linkedDrafts.length?'Черновик создан':'Создать черновик урока'}</button><Link href="/">Создать задание в кабинете →</Link><Link href="/lessons">Редактировать уроки →</Link></div></div>})}</div></>}</section>}
+ <div className="topic-progress"><span className="topic-progress-step done">1 · Тема КТП</span><span className={'topic-progress-step '+(linkedDrafts.length?'done':'')}>2 · Урок {linkedDrafts.length?'✓':'○'}</span><span className={'topic-progress-step '+(linkedAssignments.length?'done':'')}>3 · Задание {linkedAssignments.length?'✓':'○'}</span></div>
+ <p className="muted">КСП: {linkedKsp.length}. Заданий: {linkedAssignments.length}.</p>
+ <div className="actions">
+ {linkedDrafts.length?
+  <Link className="btn primary topic-action" href={'/lessons?classId='+encodeURIComponent(classId)+'&lessonId='+encodeURIComponent(linkedDrafts[0].id)}>Открыть урок →</Link>:
+  <button className="btn primary" disabled={busy} onClick={()=>void createLesson(t)}>{busy?'Создание…':'Создать черновик урока'}</button>}
+ <Link className="btn topic-action" href={'/?classId='+encodeURIComponent(classId)+'&curriculumTopicId='+encodeURIComponent(t.id)}>Создать задание →</Link>
+ </div></div>})}</div></>}</section>}
  </main></>;
 }
