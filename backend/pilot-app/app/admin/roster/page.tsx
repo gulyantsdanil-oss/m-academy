@@ -1,3 +1,4 @@
+import {SiteHeader} from '@/components/SiteHeader';
 'use client';
 import {useEffect,useState,type FormEvent} from 'react';
 import Link from 'next/link';
@@ -120,9 +121,8 @@ export default function AdminRoster(){
   setMessage('Назначение отменено.');setReload(n=>n+1);
  }
 
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">Администрирование · пилот</small></div>
- <nav className="actions"><Link href="/">Кабинет</Link><Link href="/overview">Панель</Link><Link href="/classes">Классы</Link><Link href="/help">Помощь</Link></nav></div></header>
- <main className="container"><h1>Участники классов</h1>
+ return <><SiteHeader />
+ <main className="container inner-main"><h1>Участники классов</h1>
  <p className="muted">Администратор назначает только уже созданные учётные записи с действующими ролями. Создание аккаунтов и назначение школьных ролей остаются в защищённой административной процедуре.</p>
  <div className="warning">Пилотная функция для тестовых аккаунтов взрослых. Имена являются справочной информацией, а права проверяются по подтверждённым идентификаторам Supabase. Перед назначением сверьте участника с доверенным списком. Не вводите реальные данные учащихся.</div>
  {!ready&&<p>Проверка полномочий…</p>}
