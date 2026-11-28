@@ -52,10 +52,19 @@ export default function LessonsPage(){
  const [error,setError]=useState('');
  const [message,setMessage]=useState('');
  const [reload,setReload]=useState(0);
+ const [incoming,setIncoming]=useState({classId:'',lessonId:''});
  const availableClasses=useMemo(()=>classes.filter(c=>appointments.some(a=>a.class_id===c.id)),[classes,appointments]);
  const chosen=availableClasses.some(c=>c.id===classId)?classId:availableClasses[0]?.id||'';
  const selectedDoc=documents.find(d=>d.id===selected);
  const phaseMinutes=lesson.phases.reduce((n,p)=>n+p.minutes,0);
+ useEffect(()=>{
+  const params=new URLSearchParams(window.location.search);
+  const classId=params.get('classId')||'',lessonId=params.get('lessonId')||'';
+  if(/^[0-9a-f-]{36}$/i.test(classId)&&/^[0-9a-f-]{36}$/i.test(lessonId))setIncoming({classId,lessonId});
+ },[]);
+ useEffect(()=>{
+  if(incoming.classId&&availableClasses.some(c=>c.id===incoming.classId))setClassId(incoming.classId);
+ },[incoming.classId,availableClasses]);
  const fetchLessons=useCallback(async()=>{
   if(!sb||!school||!chosen||!userId){setDocuments([]);return}
   const res=await sb.from('lesson_drafts')
@@ -102,6 +111,16 @@ export default function LessonsPage(){
   setLesson(safeContent(d.content,d.topic));setMessage('');setError('');
  }
  useEffect(()=>{setSelected('');setRevision(null);setLesson(emptyData());setOriginalContent({})},[chosen,school]);
+ useEffect(()=>{
+  if(!incoming.lessonId||chosen!==incoming.classId)return;
+  // The target must be present in the currently authenticated teacher's
+  // RLS-filtered documents. Never query a foreign lesson by URL alone.
+  const d=documents.find(v=>v.id===incoming.lessonId&&v.class_id===chosen);
+  if(!d)return;
+  setSelected(d.id);setRevision(d.revision);setOriginalContent(d.content);
+  setLesson(safeContent(d.content,d.topic));setMessage('Открыт урок из выбранной темы КТП.');
+  setIncoming({classId:'',lessonId:''});
+ },[incoming,chosen,documents]);
  function edit(k:keyof LessonData,v:string){setLesson(p=>({...p,[k]:k==='hours'?Number(v):v}))}
  function editPhase(index:number,k:keyof Phase,v:string){
   setLesson(d=>({...d,phases:d.phases.map((p,i)=>i===index?{...p,[k]:k==='minutes'?Number(v):v}:p)}))
