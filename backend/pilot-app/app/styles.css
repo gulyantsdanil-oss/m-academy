@@ -84,3 +84,38 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 @media(max-width:950px){.home-hero-visual{opacity:.55;right:-7%}.home-hero-copy{width:78%}.home-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}.home-stage{display:none}}
 @media(max-width:660px){.home-header-inner{padding:12px 16px;min-height:72px}.home-logo{height:39px;width:39px;font-size:24px}.home-wordmark-text{font-size:20px}.home-wordmark-text small{font-size:8px}.home-help-link{display:none}.home-navigation-inner{padding:0 10px}.home-nav-item{padding:13px 12px;font-size:12px}.home-main{padding:16px 13px 70px}.home-hero{min-height:290px;border-radius:19px}.home-hero-copy{width:100%;padding:36px 25px}.home-hero-visual{opacity:.13;right:-90px;top:2%}.home-hero h1{font-size:34px;letter-spacing:-1px}.home-hero p{font-size:14px}.home-hero-actions{margin-top:24px}.home-shortcuts{gap:10px}.home-shortcut{min-height:152px;padding:17px;border-radius:15px}.home-shortcut strong{font-size:13px}.home-shortcut small{font-size:11px}.home-shortcut-icon{width:38px;height:38px}.home-section-heading h2{font-size:24px}.home-main>.card{padding:20px 17px}}
 @media(max-width:380px){.home-shortcuts{grid-template-columns:1fr}.home-hero-button,.home-hero-outline{padding:10px 13px}}
+
+/* 5.1 interior design system — shared with homepage */
+.inner-header{box-shadow:0 1px 0 #e8eef7}
+.inner-header .home-wordmark:focus-visible,.inner-header .home-nav-item:focus-visible{border-radius:6px}
+.inner-main{max-width:1192px;padding:36px 24px 90px}
+.inner-main>h1{margin:0 0 10px;font-size:clamp(29px,3vw,39px);line-height:1.18;letter-spacing:-1.2px;font-weight:850;color:#172e50}
+.inner-main>h1::before{content:"M-ACADEMY / РАБОЧЕЕ ПРОСТРАНСТВО";display:block;color:#3270e4;font-size:10px;letter-spacing:.17em;font-weight:850;line-height:1.6;margin-bottom:13px}
+.inner-main>p.muted{font-size:14px;line-height:1.8;max-width:850px;margin-top:0;margin-bottom:24px}
+.inner-main .card{border-radius:20px;border:1px solid #e3eaf5;box-shadow:0 9px 30px #173d7309;padding:25px 27px;margin:20px 0;background:#fff}
+.inner-main .card h2{font-size:20px;letter-spacing:-.5px;margin:0 0 15px;color:#173254}
+.inner-main .card h3{font-size:16px;color:#244166;margin-top:14px;margin-bottom:14px}
+.inner-main .card .card{box-shadow:none;background:#fafcff;border:1px solid #e7edf7;margin:18px 0;padding:22px}
+.inner-main .warning{border:1px solid #f4deaa;background:#fffaf0;border-radius:14px;color:#845b1d;padding:16px 19px;line-height:1.65;margin:19px 0;font-size:13px}
+.inner-main .error[role=alert]{background:#fff1f3;padding:12px 16px;border:1px solid #ffd2df;border-radius:12px}
+.inner-main .success[role=status]{background:#ecfbf5;padding:13px 17px;border:1px solid #b3edcf;border-radius:12px}
+.inner-main .tag{background:#edf4ff;border:1px solid #e0eaff;color:#265fd1;padding:6px 11px}
+.inner-main .item{padding:17px 9px;border-color:#e8edf6;line-height:1.7}
+.inner-main .item b{color:#1a365d;font-weight:800}
+.inner-main .item a{color:#205fe3;font-weight:700;text-decoration:none}
+.inner-main .item a:hover{text-decoration:underline}
+.inner-main .btn{border-radius:11px;padding:11px 18px;transition:transform .16s,background .16s}
+.inner-main .btn:hover:not(:disabled){transform:translateY(-1px)}
+.inner-main .btn.primary{background:#2665eb;border-color:#2665eb;box-shadow:0 6px 15px #2365df1c}
+.inner-main .btn.primary:hover:not(:disabled){background:#174fcc}
+.inner-main label{color:#324e73;font-weight:750;font-size:12px;letter-spacing:.01em;margin:14px 0 7px}
+.inner-main :is(input,select,textarea){border:1px solid #d9e3f1;border-radius:11px;min-height:44px;padding:12px 14px;background:#fff;color:#1c3453;box-shadow:0 2px 5px #143b6005}
+.inner-main :is(input,select,textarea):focus-visible{border-color:#6c98f2;outline:3px solid #c9dfff;outline-offset:0}
+.inner-main .grid{gap:18px}
+.inner-main .actions{gap:12px}
+.inner-main .stat4{border-radius:17px;box-shadow:0 6px 21px #173e7509}
+.inner-main .stat4 strong{font-size:35px;color:#245dd8}
+.inner-main .stat-grid{margin:24px 0}
+.inner-main a:not(.btn){text-underline-offset:3px}
+@media(max-width:700px){.inner-main{padding:24px 14px 70px}.inner-main>h1{font-size:29px}.inner-main .card{padding:18px 16px;border-radius:16px}.inner-main .card .card{padding:15px}.inner-main .item{padding:14px 0}.inner-main .grid{grid-template-columns:1fr}.inner-main .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:390px){.inner-main .stat-grid{grid-template-columns:1fr}}
