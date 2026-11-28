@@ -1,3 +1,4 @@
+import {SiteHeader} from '@/components/SiteHeader';
 'use client';
 import {useCallback,useEffect,useState} from 'react';
 import {useParams} from 'next/navigation';
@@ -113,8 +114,8 @@ export default function AssignmentPage(){
   if(result.error)setError(result.error.message);
   else{setMessage('Оценка сохранена.');void reload()}
  }
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">Пилот</small></div><a href="/">← К кабинету</a></div></header>
- <main className="container">
+ return <><SiteHeader />
+ <main className="container inner-main">
  {loading?<p>Загрузка задания…</p>:error&&!assignment?<div className="warning">{error}</div>:assignment&&<>
  <h1>{assignment.topic}</h1>
  <p className="muted">{kind==='teacher'?'Режим учителя':'Самостоятельная работа'} · {assignment.published?'Опубликовано':'Черновик'}</p>
