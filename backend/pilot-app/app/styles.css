@@ -11,3 +11,76 @@
 /* Lesson editor fields */
 textarea{font:inherit;border:1px solid #cbd8eb;padding:11px;border-radius:10px;background:#fff;color:#12213c;width:100%;min-height:95px;resize:vertical}
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #24b6ae;outline-offset:2px}
+
+/* M-academy 5.0: welcoming dashboard. Scope to homepage, preserve other role screens. */
+.home-shell{min-height:100vh;background:#f4f7fc;color:#172846}
+.home-header{background:#fff;border-bottom:1px solid #e9eef5;position:relative;z-index:2}
+.home-header-inner{max-width:1192px;margin:auto;min-height:84px;padding:14px 24px;display:flex;align-items:center;gap:26px}
+.home-wordmark{display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:#172845;flex-shrink:0}
+.home-logo{display:grid;place-items:center;width:47px;height:47px;border-radius:14px;background:#2559e8;color:#fff;font-weight:900;font-size:28px;letter-spacing:-.09em;box-shadow:0 7px 18px #2559e829}
+.home-wordmark-text{font-size:23px;font-weight:900;letter-spacing:-1px;line-height:1}
+.home-wordmark-text small{display:block;letter-spacing:.015em;color:#8191a9;font-size:10px;font-weight:650;margin-top:6px}
+.home-stage{display:inline-flex;align-items:center;gap:8px;background:#edf5ff;color:#4774af;font-size:12px;font-weight:750;border:1px solid #e0edff;border-radius:100px;padding:8px 13px;white-space:nowrap}
+.home-stage-dot{width:7px;height:7px;background:#3e8ce9;border-radius:50%}
+.home-header-right{margin-left:auto;display:flex;align-items:center;gap:20px}
+.home-help-link{font-weight:700;font-size:13px;color:#596e8a;text-decoration:none}
+.home-logout{background:#fff;border:1px solid #d9e2ef;color:#334964;border-radius:10px;padding:10px 15px;font-size:13px;font-weight:750;cursor:pointer;white-space:nowrap}
+.home-logout span{margin-left:7px;color:#2559e8}
+.home-navigation{border-top:1px solid #eff2f7}
+.home-navigation-inner{max-width:1192px;margin:auto;padding:0 24px;display:flex;gap:7px;overflow-x:auto;scrollbar-width:thin}
+.home-nav-item{padding:16px 12px 14px;color:#65758d;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap;border-bottom:3px solid transparent;display:flex;align-items:center;gap:7px;transition:color .2s}
+.home-nav-item>span:first-child{font-size:16px}
+.home-nav-item:hover{color:#2459dd}
+.home-nav-current{color:#225be6;border-color:#2968f2}
+.home-main{max-width:1192px;padding:26px 24px 90px}
+.home-hero{min-height:325px;border-radius:24px;background:linear-gradient(116deg,#133475 0%,#1a4fba 54%,#3979f2 100%);display:flex;overflow:hidden;position:relative;box-shadow:0 20px 45px #1f5aba1b;color:#fff;margin:0 0 36px}
+.home-hero:before{content:"";position:absolute;width:550px;height:550px;border:1px solid #ffffff1b;border-radius:50%;right:-170px;top:-170px;pointer-events:none}
+.home-hero:after{content:"";position:absolute;width:400px;height:400px;border:1px solid #ffffff18;border-radius:50%;right:-100px;top:-100px;pointer-events:none}
+.home-hero-copy{padding:49px 30px 45px 55px;position:relative;z-index:1;width:69%}
+.home-eyebrow{display:inline-block;color:#bcd7ff;font-weight:850;letter-spacing:.16em;font-size:10px;margin-bottom:18px}
+.home-hero h1{font-size:clamp(31px,3.3vw,45px);line-height:1.14;letter-spacing:-1.65px;max-width:650px;color:white;margin:0 0 16px;font-weight:850}
+.home-hero p{max-width:510px;font-size:15px;line-height:1.8;color:#d8e5fc;margin:0}
+.home-hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.home-hero-button,.home-hero-outline{display:inline-flex;gap:13px;align-items:center;justify-content:center;padding:12px 20px;font-weight:780;font-size:13px;border-radius:11px;text-decoration:none}
+.home-hero-button{background:#fff;color:#1d4da9;box-shadow:0 5px 15px #061b4133}
+.home-hero-outline{color:#fff;border:1px solid #ffffff77}
+.home-hero-visual{position:absolute;right:3%;top:4%;width:32%;height:100%;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.home-math-circle{position:relative;width:235px;height:235px;transform:rotate(-12deg);border:1px solid #bdd6ff48;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffffff26,transparent 60%);box-shadow:0 0 0 32px #ffffff0c,0 0 0 75px #ffffff09}
+.home-math-circle span{position:absolute;color:#eaf5ff;font-family:Georgia,serif;font-weight:700;text-shadow:0 7px 20px #1236757a}
+.home-math-circle span:nth-child(1){font-size:76px;left:42%;top:20%}
+.home-math-circle span:nth-child(2){font-size:48px;left:14%;top:15%;color:#b4d5ff}
+.home-math-circle span:nth-child(3){font-size:44px;right:9%;bottom:14%;color:#c8e5ff}
+.home-math-circle span:nth-child(4){font-size:55px;left:16%;bottom:8%}
+.home-floating-note{position:absolute;right:0;bottom:35px;display:flex;gap:10px;align-items:center;padding:13px 19px;background:#fff;color:#22436e;border-radius:14px;box-shadow:0 12px 35px #0b285f42;transform:rotate(4deg);font-size:10px;font-weight:850;letter-spacing:.055em}
+.home-floating-note span{color:#f6ac27;font-size:22px}
+.home-floating-note b{display:block;color:#2465e5;font-size:14px;letter-spacing:0;margin-top:2px}
+.home-section-heading{margin:0 0 18px}
+.home-kicker{font-size:10px;color:#2b67d6;letter-spacing:.16em;font-weight:850}
+.home-section-heading h2{font-size:28px;color:#152945;letter-spacing:-.8px;margin:7px 0 5px}
+.home-section-heading p{color:#8291a7;font-size:14px;margin:0 0 18px}
+.home-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:26px}
+.home-shortcut{position:relative;min-height:163px;display:flex;flex-direction:column;gap:8px;text-decoration:none;border:1px solid #e4ebf5;background:#fff;border-radius:19px;padding:21px;box-shadow:0 5px 20px #122e5609;transition:transform .2s,box-shadow .2s}
+.home-shortcut:hover{transform:translateY(-3px);box-shadow:0 15px 30px #1b46751b}
+.home-shortcut-icon{width:42px;height:42px;display:grid;place-items:center;background:#e9f0ff;border-radius:12px;color:#2b66e6;font-size:25px;margin-bottom:6px}
+.home-shortcut:nth-child(2) .home-shortcut-icon{background:#e9f8f4;color:#158c79}
+.home-shortcut:nth-child(3) .home-shortcut-icon{background:#fff3e8;color:#d78b3b}
+.home-shortcut:nth-child(4) .home-shortcut-icon{background:#f1ebff;color:#7a54c2}
+.home-shortcut strong{color:#203957;font-size:15px;font-weight:800}
+.home-shortcut small{color:#8292a9;font-size:12px}
+.home-shortcut-arrow{position:absolute;right:19px;top:20px;color:#9fb0c7;font-size:18px}
+.home-pilot-note{display:flex;gap:12px;align-items:flex-start;background:#fff9ed;border:1px solid #f7e8c4;padding:16px 20px;border-radius:14px;margin-bottom:27px}
+.home-note-symbol{font-size:20px;color:#bd842d}
+.home-pilot-note div{display:flex;flex-direction:column;gap:4px}
+.home-pilot-note b{font-size:13px;color:#8c631e}
+.home-pilot-note div span{font-size:12px;line-height:1.6;color:#8c7957}
+.home-main>.card{border:1px solid #e5ebf5;border-radius:20px;box-shadow:0 8px 30px #24436f0a;padding:26px 28px;margin:18px 0}
+.home-main>.card h2{color:#1c3352;letter-spacing:-.45px}
+.home-main .item{line-height:1.7}
+.home-main .btn.primary{background:#2462e7;border-color:#2462e7}
+.home-main .btn{transition:background .2s,transform .2s}
+.home-main .btn:not(:disabled):hover{transform:translateY(-1px)}
+.home-main select,.home-main input,.home-main textarea{border-color:#d9e3f2}
+.home-session{border-left:4px solid #3779ee!important}
+@media(max-width:950px){.home-hero-visual{opacity:.55;right:-7%}.home-hero-copy{width:78%}.home-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}.home-stage{display:none}}
+@media(max-width:660px){.home-header-inner{padding:12px 16px;min-height:72px}.home-logo{height:39px;width:39px;font-size:24px}.home-wordmark-text{font-size:20px}.home-wordmark-text small{font-size:8px}.home-help-link{display:none}.home-navigation-inner{padding:0 10px}.home-nav-item{padding:13px 12px;font-size:12px}.home-main{padding:16px 13px 70px}.home-hero{min-height:290px;border-radius:19px}.home-hero-copy{width:100%;padding:36px 25px}.home-hero-visual{opacity:.13;right:-90px;top:2%}.home-hero h1{font-size:34px;letter-spacing:-1px}.home-hero p{font-size:14px}.home-hero-actions{margin-top:24px}.home-shortcuts{gap:10px}.home-shortcut{min-height:152px;padding:17px;border-radius:15px}.home-shortcut strong{font-size:13px}.home-shortcut small{font-size:11px}.home-shortcut-icon{width:38px;height:38px}.home-section-heading h2{font-size:24px}.home-main>.card{padding:20px 17px}}
+@media(max-width:380px){.home-shortcuts{grid-template-columns:1fr}.home-hero-button,.home-hero-outline{padding:10px 13px}}
