@@ -1,5 +1,5 @@
-import {SiteHeader} from '@/components/SiteHeader';
 'use client';
+import {SiteHeader} from '@/components/SiteHeader';
 import {useCallback,useEffect,useState} from 'react';
 import Link from 'next/link';
 import {getSupabase} from '@/lib/supabase';
