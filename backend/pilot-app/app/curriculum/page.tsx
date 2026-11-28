@@ -1,3 +1,4 @@
+import {SiteHeader} from '@/components/SiteHeader';
 'use client';
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import Link from 'next/link';
@@ -140,8 +141,8 @@ export default function CurriculumPage(){
    setMessage('Черновик урока создан и связан с темой КТП.');setTick(x=>x+1);
   }catch(e){setError(e instanceof Error?e.message:'Ошибка создания урока')}finally{setBusy(false)}
  }
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">4.1 · КТП → урок → задание</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/overview">Панель 4.0</Link><Link href="/lessons">Редактор уроков</Link><Link href="/assignments">Задания</Link><Link href="/results">Результаты</Link></nav></div></header>
- <main className="container"><h1>Связанные учебные материалы</h1><p className="muted">Каждая тема получает постоянный идентификатор в базе. Уроки и задания могут ссылаться на него без поиска по названию.</p>
+ return <><SiteHeader />
+ <main className="container inner-main"><h1>Связанные учебные материалы</h1><p className="muted">Каждая тема получает постоянный идентификатор в базе. Уроки и задания могут ссылаться на него без поиска по названию.</p>
  <div className="warning"><b>Пилотная функция.</b> Не используйте реальные данные учащихся до завершения проверки безопасности. КТП сначала сохраняется педагогом в серверном редакторе, затем темы синхронизируются отдельной кнопкой. Реальные данные учеников не используйте.</div>
  {!ready&&<p>Проверка доступа…</p>}
  {error&&<p role="alert" className="error">{error}</p>}{message&&<p role="status" className="success">{message}</p>}
