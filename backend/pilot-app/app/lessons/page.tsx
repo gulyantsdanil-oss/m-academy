@@ -1,3 +1,4 @@
+import {SiteHeader} from '@/components/SiteHeader';
 'use client';
 import {useCallback,useEffect,useMemo,useState,type FormEvent} from 'react';
 import Link from 'next/link';
@@ -121,8 +122,8 @@ export default function LessonsPage(){
   setRevision(data);setOriginalContent(content);setMessage('Новая редакция урока №'+data+' сохранена на сервере.');
   setPending(false);setReload(n=>n+1);
  }
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">4.2 · редактор уроков</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/overview">Панель</Link><Link href="/curriculum">КТП</Link><Link href="/results">Результаты</Link></nav></div></header>
- <main className="container"><h1>Редактор уроков</h1><p className="muted">Откройте черновик, связанный с КТП, настройте ход занятия и сохраните новую редакцию на сервере. Документы другого учителя недоступны.</p>
+ return <><SiteHeader />
+ <main className="container inner-main"><h1>Редактор уроков</h1><p className="muted">Откройте черновик, связанный с КТП, настройте ход занятия и сохраните новую редакцию на сервере. Документы другого учителя недоступны.</p>
  <div className="warning">Тестовый режим. Не вводите данные реальных несовершеннолетних до завершения проверки безопасности и развёртывания.</div>
  {!loaded&&<p>Проверка доступа…</p>}{error&&<p className="error" role="alert">{error}</p>}{message&&<p className="success" role="status">{message}</p>}
  {!!memberships.length&&<section className="card">
