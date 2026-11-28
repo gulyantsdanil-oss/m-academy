@@ -1,7 +1,8 @@
+import {SiteHeader} from '@/components/SiteHeader';
 import Link from 'next/link';
 export default function HelpPage(){
- return <><header className="top"><div className="bar"><div className="brand"><span>M</span>-academy <small className="tag">Навигация</small></div><nav className="actions"><Link href="/">Кабинет</Link><Link href="/classes">Классы</Link><Link href="/admin/roster">Участники классов</Link><Link href="/auth-check">Проверка входа</Link><Link href="/assignments">Задания</Link></nav></div></header>
- <main className="container"><h1>Как пользоваться M-academy</h1><p className="muted">Краткая инструкция для тестового серверного кабинета.</p>
+ return <><SiteHeader />
+ <main className="container inner-main"><h1>Как пользоваться M-academy</h1><p className="muted">Краткая инструкция для тестового серверного кабинета.</p>
  <div className="grid">
  <section className="card"><h2>Администратор</h2><p>Создаёт учебные классы в главном кабинете. Роли и участников назначают только через доверенное администрирование Supabase, а не открытую регистрацию.</p><Link href="/">Открыть кабинет</Link></section>
  <section className="card"><h2>Учитель</h2><p>Работает с назначенными классами, создаёт КТП, КСП и задания. После публикации работа становится доступной участникам соответствующего класса.</p><Link href="/classes">Мои классы</Link></section>
